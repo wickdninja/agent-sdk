@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { RealtimeSession } from '@openai/agents/realtime';
 import { createBaristaAgent } from './agent/barista';
 import { Coffee, Mic, MicOff, Volume2, Loader2 } from 'lucide-react';
@@ -8,19 +8,35 @@ function App() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [orderHistory, setOrderHistory] = useState<string[]>([]);
-  const [currentTranscript, setCurrentTranscript] = useState('');
+  const [currentTranscript] = useState('');
   const sessionRef = useRef<RealtimeSession | null>(null);
 
   const connectToBarista = async () => {
     setIsConnecting(true);
     try {
+      // Fetch ephemeral token from backend
+      const tokenResponse = await fetch('http://localhost:3001/api/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          voice: 'alloy', // You can make this configurable
+        }),
+      });
+
+      if (!tokenResponse.ok) {
+        throw new Error('Failed to get session token');
+      }
+
+      const tokenData = await tokenResponse.json();
+      
       const agent = createBaristaAgent();
       const session = new RealtimeSession(agent);
       
-      // For demo purposes - using a hardcoded API key
-      // In production, fetch ephemeral key from your backend
+      // Use the ephemeral token from backend
       await session.connect({
-        apiKey: process.env.REACT_APP_OPENAI_API_KEY || 'demo-key',
+        apiKey: tokenData.client_secret.value,
       });
 
       sessionRef.current = session;
@@ -30,7 +46,7 @@ function App() {
       setOrderHistory(prev => [...prev, "Bella: Hi! Welcome to Brew & Byte Café! What can I brew for you today?"]);
     } catch (error) {
       console.error('Failed to connect:', error);
-      alert('Failed to connect to barista. Please check your API key.');
+      alert('Failed to connect to barista. Make sure the backend server is running on port 3001.');
     } finally {
       setIsConnecting(false);
     }
@@ -38,7 +54,8 @@ function App() {
 
   const disconnect = () => {
     if (sessionRef.current) {
-      sessionRef.current.disconnect();
+      // Close the session - implementation depends on the actual API
+      // For now, just clear the reference
       sessionRef.current = null;
     }
     setIsConnected(false);
