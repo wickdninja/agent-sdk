@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brew & Byte Café - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'coffee': {
+                            50: '#fdf8f3',
+                            100: '#f9ede0',
+                            200: '#f3d5b8',
+                            300: '#e9bc94',
+                            400: '#d89458',
+                            500: '#c97937',
+                            600: '#b66329',
+                            700: '#964f23',
+                            800: '#793f20',
+                            900: '#64361e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-amber-800 to-amber-900 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <svg class="w-10 h-10 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17h6M9 17v1a1 1 0 01-1 1H6a1 1 0 01-1-1v-1M9 17V7a2 2 0 012-2h2a2 2 0 012 2v10M15 17v1a1 1 0 001 1h2a1 1 0 001-1v-1M15 17V7M5 7h14l-.75 2.5M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2"></path>
+                    </svg>
+                    <div>
+                        <h1 class="text-3xl font-bold">Admin Dashboard</h1>
+                        <p class="text-amber-100 text-sm font-medium">Brew & Byte Café Management</p>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="/" class="bg-amber-600 hover:bg-amber-700 px-4 py-2 rounded-lg transition-colors font-medium">
+                        Customer View
+                    </a>
+                    <button id="refresh-btn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors font-medium">
+                        Refresh Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Today's Sales</p>
+                        <p class="text-3xl font-bold text-gray-900" id="today-sales">$0.00</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-lg">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Today's Orders</p>
+                        <p class="text-3xl font-bold text-gray-900" id="today-orders">0</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-lg">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Active Orders</p>
+                        <p class="text-3xl font-bold text-gray-900" id="active-orders">0</p>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded-lg">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Avg Order Value</p>
+                        <p class="text-3xl font-bold text-gray-900" id="avg-order">$0.00</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-lg">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Active Orders -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Active Orders</h2>
+                <div id="active-orders-list" class="space-y-3 max-h-96 overflow-y-auto">
+                    <p class="text-gray-500 text-center py-4">Loading orders...</p>
+                </div>
+            </div>
+            
+            <!-- Popular Items -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Popular Items</h2>
+                <div id="popular-items-list" class="space-y-3 max-h-96 overflow-y-auto">
+                    <p class="text-gray-500 text-center py-4">Loading items...</p>
+                </div>
+            </div>
+            
+            <!-- Revenue by Category -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Revenue by Category</h2>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="revenue-chart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Sales Trend -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Sales Trend (Last 7 Days)</h2>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="sales-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Admin dashboard functionality
+        class AdminDashboard {
+            constructor() {
+                this.charts = {};
+                this.init();
+            }
+            
+            async init() {
+                await this.loadData();
+                this.initEventListeners();
+                this.startAutoRefresh();
+            }
+            
+            initEventListeners() {
+                document.getElementById('refresh-btn').addEventListener('click', () => {
+                    this.loadData();
+                });
+            }
+            
+            async loadData() {
+                try {
+                    // Load all data in parallel
+                    const [sales, activeOrders, popular, revenue, weeklySales] = await Promise.all([
+                        fetch('/api/analytics/sales').then(r => r.json()),
+                        fetch('/api/orders/active').then(r => r.json()),
+                        fetch('/api/analytics/popular').then(r => r.json()),
+                        fetch('/api/analytics/revenue').then(r => r.json()),
+                        fetch('/api/analytics/weekly').then(r => r.json())
+                    ]);
+                    
+                    this.updateStats(sales);
+                    this.updateActiveOrders(activeOrders);
+                    this.updatePopularItems(popular);
+                    this.updateRevenueChart(revenue);
+                    this.updateSalesChart(weeklySales);
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                }
+            }
+            
+            updateStats(sales) {
+                document.getElementById('today-sales').textContent = `$${(sales.total_sales || 0).toFixed(2)}`;
+                document.getElementById('today-orders').textContent = sales.order_count || 0;
+                document.getElementById('avg-order').textContent = `$${(sales.average_order_value || 0).toFixed(2)}`;
+            }
+            
+            updateActiveOrders(orders) {
+                const container = document.getElementById('active-orders-list');
+                document.getElementById('active-orders').textContent = orders.length;
+                
+                if (orders.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500 text-center py-4">No active orders</p>';
+                    return;
+                }
+                
+                container.innerHTML = orders.map(order => `
+                    <div class="border-l-4 border-coffee-500 bg-gray-50 p-4 rounded-lg fade-in">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-semibold text-gray-800">Order #${order.id}</p>
+                                <p class="text-sm text-gray-600">${order.customer_name}</p>
+                                <p class="text-xs text-gray-500">${new Date(order.created_at).toLocaleTimeString()}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-lg">$${order.total}</p>
+                                <span class="inline-block px-2 py-1 text-xs rounded-full ${
+                                    order.status === 'preparing' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'
+                                }">
+                                    ${order.status}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex space-x-2">
+                            <button onclick="updateOrderStatus(${order.id}, 'ready')" 
+                                class="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
+                                Mark Ready
+                            </button>
+                            <button onclick="updateOrderStatus(${order.id}, 'completed')" 
+                                class="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                                Complete
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            updatePopularItems(items) {
+                const container = document.getElementById('popular-items-list');
+                
+                if (items.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500 text-center py-4">No data available</p>';
+                    return;
+                }
+                
+                container.innerHTML = items.map((item, index) => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg fade-in">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-lg font-bold text-coffee-600">#${index + 1}</span>
+                            <div>
+                                <p class="font-semibold text-gray-800">${item.name}</p>
+                                <p class="text-xs text-gray-500">${item.category} - ${item.subcategory}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold">${item.times_ordered} sold</p>
+                            <p class="text-sm text-gray-600">$${item.price}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            updateRevenueChart(revenue) {
+                // If chart exists and data hasn't changed significantly, just update data
+                if (this.charts.revenue) {
+                    this.charts.revenue.data.labels = revenue.map(r => r.category);
+                    this.charts.revenue.data.datasets[0].data = revenue.map(r => r.revenue);
+                    this.charts.revenue.update('none'); // Update without animation
+                    return;
+                }
+                
+                // Get fresh context and clear canvas
+                const canvas = document.getElementById('revenue-chart');
+                const ctx = canvas.getContext('2d');
+                
+                // Create new chart only if it doesn't exist
+                this.charts.revenue = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: revenue.map(r => r.category),
+                        datasets: [{
+                            data: revenue.map(r => r.revenue),
+                            backgroundColor: [
+                                '#92400e',
+                                '#d97706',
+                                '#fbbf24',
+                                '#fed7aa'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        aspectRatio: 2,
+                        animation: {
+                            duration: 500
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+            
+            updateSalesChart(weeklySales) {
+                // Process the weekly sales data
+                const labels = weeklySales.map(day => day.label);
+                const data = weeklySales.map(day => day.total_sales);
+                
+                // If chart exists, just update the data
+                if (this.charts.sales) {
+                    this.charts.sales.data.labels = labels;
+                    this.charts.sales.data.datasets[0].data = data;
+                    this.charts.sales.update('none'); // Update without animation
+                    return;
+                }
+                
+                // Get fresh context and clear canvas
+                const canvas = document.getElementById('sales-chart');
+                const ctx = canvas.getContext('2d');
+                
+                // Create new chart only if it doesn't exist
+                this.charts.sales = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Sales ($)',
+                            data: data,
+                            borderColor: '#d97706',
+                            backgroundColor: 'rgba(217, 119, 6, 0.1)',
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        aspectRatio: 2,
+                        animation: {
+                            duration: 500
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.dataset.label || '';
+                                        const value = '$' + context.parsed.y.toFixed(2);
+                                        return label + ': ' + value;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            startAutoRefresh() {
+                // Clear any existing interval
+                if (this.refreshInterval) {
+                    clearInterval(this.refreshInterval);
+                }
+                
+                // Refresh active orders every 30 seconds
+                this.refreshInterval = setInterval(() => {
+                    this.loadData();
+                }, 30000);
+            }
+            
+            destroy() {
+                // Clean up charts and intervals
+                if (this.refreshInterval) {
+                    clearInterval(this.refreshInterval);
+                }
+                if (this.charts.revenue) {
+                    this.charts.revenue.destroy();
+                    this.charts.revenue = null;
+                }
+                if (this.charts.sales) {
+                    this.charts.sales.destroy();
+                    this.charts.sales = null;
+                }
+            }
+        }
+        
+        // Order status update function
+        async function updateOrderStatus(orderId, status) {
+            try {
+                const response = await fetch(`/api/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+                
+                if (response.ok) {
+                    dashboard.loadData(); // Refresh data
+                }
+            } catch (error) {
+                console.error('Error updating order:', error);
+            }
+        }
+        
+        // Initialize dashboard
+        let dashboard;
+        document.addEventListener('DOMContentLoaded', () => {
+            dashboard = new AdminDashboard();
+        });
+        
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            if (dashboard) {
+                dashboard.destroy();
+            }
+        });
+    </script>
+</body>
+</html>
