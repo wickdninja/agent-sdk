@@ -1,4 +1,4 @@
-const { ZepClient } = require('@getzep/zep-cloud');
+const { Zep } = require('@getzep/zep-cloud');
 const { v4: uuidv4 } = require('uuid');
 
 class ZepMemoryService {
@@ -7,9 +7,9 @@ class ZepMemoryService {
             throw new Error('Zep API key is required');
         }
         
-        this.client = new ZepClient({
-            apiKey: apiKey
-        });
+        // Initialize Zep with API key
+        this.apiKey = apiKey;
+        this.client = Zep;
         
         // Cache for active threads
         this.activeThreads = new Map();
@@ -27,7 +27,9 @@ class ZepMemoryService {
         try {
             // Try to get existing user first
             try {
-                const existingUser = await this.client.user.get(userId);
+                const existingUser = await this.client.user.get(userId, {
+                    apiKey: this.apiKey
+                });
                 console.log(`[Zep] Retrieved existing user: ${userId}`);
                 
                 // Update user metadata if provided
@@ -38,6 +40,8 @@ class ZepMemoryService {
                             ...userData.metadata,
                             lastSeen: new Date().toISOString()
                         }
+                    }, {
+                        apiKey: this.apiKey
                     });
                 }
                 
@@ -46,16 +50,18 @@ class ZepMemoryService {
                 // User doesn't exist, create new one
                 console.log(`[Zep] Creating new user: ${userId}`);
                 const newUser = await this.client.user.add({
-                    user_id: userId,
+                    userId: userId,
                     email: userData.email || `${userId}@brewbyte.cafe`,
-                    first_name: userData.firstName || userData.name || 'Customer',
-                    last_name: userData.lastName || '',
+                    firstName: userData.firstName || userData.name || 'Customer',
+                    lastName: userData.lastName || '',
                     metadata: {
                         ...userData.metadata,
                         createdAt: new Date().toISOString(),
                         lastSeen: new Date().toISOString(),
                         source: 'voice-agent'
                     }
+                }, {
+                    apiKey: this.apiKey
                 });
                 
                 return newUser;
@@ -73,15 +79,17 @@ class ZepMemoryService {
         try {
             const threadId = sessionId || uuidv4();
             
-            await this.client.thread.create({
-                thread_id: threadId,
-                user_id: userId,
+            await this.client.thread.add({
+                threadId: threadId,
+                userId: userId,
                 name: `Coffee Order Session - ${new Date().toLocaleDateString()}`,
                 metadata: {
                     type: 'voice_conversation',
                     channel: 'webrtc',
                     startedAt: new Date().toISOString()
                 }
+            }, {
+                apiKey: this.apiKey
             });
             
             this.activeThreads.set(userId, threadId);
@@ -115,7 +123,9 @@ class ZepMemoryService {
                 }
             };
             
-            await this.client.thread.addMessages(threadId, [zepMessage]);
+            await this.client.thread.addMessages(threadId, [zepMessage], {
+                apiKey: this.apiKey
+            });
             console.log(`[Zep] Added ${role} message to thread: ${threadId}`);
             
             // Clear context cache for this user to force refresh
@@ -149,7 +159,9 @@ class ZepMemoryService {
                 }
             }));
             
-            await this.client.thread.addMessages(threadId, zepMessages);
+            await this.client.thread.addMessages(threadId, zepMessages, {
+                apiKey: this.apiKey
+            });
             console.log(`[Zep] Added ${messages.length} messages to thread: ${threadId}`);
             
             // Clear context cache
@@ -183,7 +195,9 @@ class ZepMemoryService {
             }
             
             // Get user context with facts and entities
-            const memory = await this.client.thread.getUserContext(threadId);
+            const memory = await this.client.thread.getUserContext(threadId, {
+                apiKey: this.apiKey
+            });
             
             // Cache the context
             this.contextCache.set(userId, {
@@ -208,14 +222,22 @@ class ZepMemoryService {
                 facts = [facts];
             }
             
-            const formattedFacts = facts.map(fact => ({
-                fact: fact.fact || fact,
-                created_at: fact.created_at || new Date().toISOString(),
-                expires_at: fact.expires_at || null,
-                rating: fact.rating || 1.0
-            }));
+            // Format facts as text data for graph
+            const factsText = facts.map(fact => {
+                const factString = fact.fact || fact;
+                const rating = fact.rating || 1.0;
+                return `[${rating}] ${factString}`;
+            }).join('\n');
             
-            await this.client.user.addFacts(userId, formattedFacts);
+            // Add to graph as text data
+            await this.client.graph.add({
+                userId: userId,
+                type: 'text',
+                data: factsText
+            }, {
+                apiKey: this.apiKey
+            });
+            
             console.log(`[Zep] Added ${facts.length} facts for user: ${userId}`);
             
             // Clear context cache
@@ -287,14 +309,17 @@ class ZepMemoryService {
      */
     async searchUserHistory(userId, query, limit = 5) {
         try {
-            const results = await this.client.user.searchMemory(userId, {
+            const results = await this.client.graph.search({
+                userId: userId,
                 query: query,
                 limit: limit,
-                search_type: 'hybrid' // Uses both semantic and keyword search
+                scope: 'edges'
+            }, {
+                apiKey: this.apiKey
             });
             
-            console.log(`[Zep] Found ${results.length} results for query: "${query}"`);
-            return results;
+            console.log(`[Zep] Found ${results?.edges?.length || 0} results for query: "${query}"`);
+            return results?.edges || [];
         } catch (error) {
             console.error('[Zep] Error searching user history:', error);
             return [];
@@ -313,6 +338,8 @@ class ZepMemoryService {
             
             const messages = await this.client.thread.getMessages(threadId, {
                 limit: 50
+            }, {
+                apiKey: this.apiKey
             });
             
             if (!messages || messages.length === 0) {
@@ -352,6 +379,8 @@ class ZepMemoryService {
                     endedAt: new Date().toISOString(),
                     status: 'completed'
                 }
+            }, {
+                apiKey: this.apiKey
             });
             
             // Remove from active threads
@@ -371,10 +400,17 @@ class ZepMemoryService {
      */
     async getUserFacts(userId, limit = 20) {
         try {
-            const facts = await this.client.user.getFacts(userId, {
-                limit: limit
+            // Search for all facts in the user's graph
+            const results = await this.client.graph.search({
+                userId: userId,
+                query: '*',
+                limit: limit,
+                scope: 'nodes'
+            }, {
+                apiKey: this.apiKey
             });
             
+            const facts = results?.nodes || [];
             console.log(`[Zep] Retrieved ${facts.length} facts for user: ${userId}`);
             return facts;
         } catch (error) {
