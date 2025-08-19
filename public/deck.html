@@ -324,10 +324,10 @@
     <div class="timer" id="timer">00:00</div>
     
     <!-- Slide Number -->
-    <div class="slide-number" id="slideNumber">1 / 31</div>
+    <div class="slide-number" id="slideNumber">1 / 24</div>
 
     <div class="presentation-container">
-        <!-- Slide 1: Title -->
+        <!-- Slide 1: Title (Placeholder) -->
         <div class="slide active">
             <h1>Building a Real-Time Voice Agent with OpenAI SDK</h1>
             <h3 style="color: #764ba2;">From WebRTC to Production in 15 Minutes</h3>
@@ -338,7 +338,57 @@
             </div>
         </div>
 
-        <!-- Slide 2: What We're Building -->
+        <!-- Slide 2: Who Am I -->
+        <div class="slide">
+            <h1>Building a Real-Time Voice Agent with OpenAI SDK</h1>
+            <h3 style="color: #764ba2;">From WebRTC to Production in 15 Minutes</h3>
+            <div style="margin: 60px 0; padding: 40px; background: linear-gradient(135deg, #667eea15, #764ba215); border-radius: 15px; border-left: 4px solid #667eea;">
+                <h2 style="color: #667eea; margin-bottom: 30px;">Who Am I?</h2>
+                <h3 style="color: #333; margin-bottom: 20px;">Nate Ross</h3>
+                <p style="font-size: 1.2em; line-height: 1.8; margin-bottom: 20px;">
+                    <strong>Staff Engineer at Bambee HR</strong>
+                </p>
+                <p style="font-size: 1.1em; line-height: 1.8;">
+                    I've had the opportunity to build and deploy agentic solutions into production, automating real workloads that impact thousands of businesses daily.
+                </p>
+                <p style="font-size: 1.1em; line-height: 1.8; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+                    Today, we'll explore OpenAI's Agent SDK and build a voice-to-voice agent together. Not production-perfect, but real enough to show you what's possible when you understand the fundamentals.
+                </p>
+            </div>
+            <div style="margin-top: auto;">
+                <p style="font-size: 1.5em; color: #667eea;">☕ Let's build something real</p>
+            </div>
+        </div>
+
+        <!-- Slide 3: Let's Talk About Value -->
+        <div class="slide">
+            <h1>Building a Real-Time Voice Agent with OpenAI SDK</h1>
+            <h3 style="color: #764ba2;">From WebRTC to Production in 15 Minutes</h3>
+            <div style="margin: 40px 0; padding: 30px; background: linear-gradient(135deg, #667eea15, #764ba215); border-radius: 15px; border-left: 4px solid #667eea;">
+                <h3 style="color: #667eea; margin-bottom: 15px;">Let's Talk About Value</h3>
+                <p style="font-size: 1.1em; line-height: 1.8;">
+                    In the dawn of the internet and the dotcom boom, infrastructure didn't become the unicorns. 
+                    <strong>Cisco, Oracle, Sun Microsystems</strong>—they built the pipes and platforms, solid businesses yes, but ultimately commodities with capped ROI.
+                </p>
+                <p style="font-size: 1.1em; line-height: 1.8; margin-top: 15px;">
+                    It was the <strong>application developers</strong> who became the trillion-dollar unicorns—<strong>Facebook, Amazon, Netflix, Google</strong>—companies that leveraged that infrastructure to drive real value to consumers and capture markets.
+                </p>
+                <p style="font-size: 1.2em; line-height: 1.8; margin-top: 15px; color: #764ba2; font-weight: 600;">
+                    LLMs are quickly becoming the commodities in the age of intelligence. It's a new dawn for application developers to build the next level of value.
+                </p>
+                <p style="font-size: 1.05em; line-height: 1.7; margin-top: 20px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+                    <strong style="color: #667eea;">The next level?</strong> Humans don't interact through API calls and JSON. 
+                    We're entering the era of <strong>ambient computing</strong>—voice that understands context, UIs that generate themselves in real-time, 
+                    video that adapts to who's watching. Today's voice agent is just the beginning. 
+                    Once you understand these building blocks, you'll see opportunities everywhere.
+                </p>
+            </div>
+            <div style="margin-top: auto;">
+                <p style="font-size: 1.5em; color: #667eea;">☕ Today: Building Value with Voice AI</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: What We're Building -->
         <div class="slide">
             <h2>What We're Building Today</h2>
             <div class="two-column">
@@ -362,12 +412,13 @@
                     </ul>
                 </div>
             </div>
-            <div class="demo-placeholder">
-                🎭 DEMO: Show the live Brew & Byte Café interface
+            <div class="demo-placeholder" style="padding: 20px;">
+                <img src="demo-preview.gif" alt="Demo Preview" style="width: 100%; max-width: 900px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <p style="margin-top: 15px; font-size: 0.9em; color: #fff;">Preview of the Brew & Byte Café voice ordering experience</p>
             </div>
         </div>
 
-        <!-- Slide 3: Architecture Overview -->
+        <!-- Slide 5: Architecture Overview -->
         <div class="slide">
             <h2>System Architecture</h2>
             <div class="architecture-diagram">
@@ -397,7 +448,7 @@
             </div>
         </div>
 
-        <!-- Slide 4: Setting Up the Project -->
+        <!-- Slide 6: Setting Up the Project -->
         <div class="slide">
             <h2>Project Setup</h2>
             <div class="code-snippet">
@@ -406,11 +457,13 @@
 {
   <span class="string">"name"</span>: <span class="string">"vanilla-brew-byte"</span>,
   <span class="string">"dependencies"</span>: {
-    <span class="string">"express"</span>: <span class="string">"^4.18.2"</span>,     <span class="comment">// Web server</span>
-    <span class="string">"sqlite3"</span>: <span class="string">"^5.1.7"</span>,     <span class="comment">// Database</span>
-    <span class="string">"dotenv"</span>: <span class="string">"^16.3.1"</span>,      <span class="comment">// Environment vars</span>
-    <span class="string">"cors"</span>: <span class="string">"^2.8.5"</span>,         <span class="comment">// CORS handling</span>
-    <span class="string">"node-fetch"</span>: <span class="string">"^2.7.0"</span>   <span class="comment">// HTTP client</span>
+    <span class="string">"@openai/agents"</span>: <span class="string">"latest"</span>,  <span class="comment">// OpenAI Agent SDK</span>
+    <span class="string">"express"</span>: <span class="string">"^4.18.2"</span>,        <span class="comment">// Web server</span>
+    <span class="string">"sqlite3"</span>: <span class="string">"^5.1.7"</span>,         <span class="comment">// Database</span>
+    <span class="string">"sqlite"</span>: <span class="string">"^5.1.1"</span>,          <span class="comment">// SQLite wrapper</span>
+    <span class="string">"dotenv"</span>: <span class="string">"^16.3.1"</span>,         <span class="comment">// Environment vars</span>
+    <span class="string">"cors"</span>: <span class="string">"^2.8.5"</span>,            <span class="comment">// CORS handling</span>
+    <span class="string">"node-fetch"</span>: <span class="string">"^2.7.0"</span>      <span class="comment">// HTTP client</span>
   }
 }</code></pre>
             </div>
@@ -420,7 +473,7 @@ OPENAI_API_KEY=sk-...
 PORT=3001</code></pre>
         </div>
 
-        <!-- Slide 5: Server Implementation -->
+        <!-- Slide 7: Server Implementation -->
         <div class="slide">
             <h2>Server Architecture</h2>
             <div class="code-snippet">
@@ -444,7 +497,7 @@ app.<span class="function">use</span>(<span class="string">'/api/analytics'</spa
             </div>
         </div>
 
-        <!-- Slide 6: WebRTC Session Creation Overview -->
+        <!-- Slide 8: WebRTC Session Creation Overview -->
         <div class="slide">
             <h2>Creating WebRTC Sessions - Overview</h2>
             <div class="code-snippet">
@@ -576,6 +629,11 @@ router.<span class="function">get</span>(<span class="string">'/'</span>, <span 
         <!-- Slide 6c: Voice Selection -->
         <div class="slide">
             <h2>Voice Selection & Personality</h2>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <a href="https://www.openai.fm/" target="_blank" style="color: #667eea; text-decoration: none; font-size: 1.1em; padding: 10px 20px; background: #f8f9fa; border-radius: 8px; display: inline-block;">
+                    🎤 Try Different Voices at OpenAI.fm Playground
+                </a>
+            </div>
             <div class="two-column">
                 <div>
                     <h3>Available Voices</h3>
@@ -694,7 +752,7 @@ router.<span class="function">get</span>(<span class="string">'/'</span>, <span 
             </div>
         </div>
 
-        <!-- Slide 7: Client-Side WebRTC Implementation -->
+        <!-- Slide 9: Client-Side WebRTC Implementation -->
         <div class="slide">
             <h2>Client WebRTC Implementation: Step by Step</h2>
             <div class="code-snippet">
@@ -1213,22 +1271,22 @@ turn_detection: { type: <span class="string">'none'</span> }
                 
                 <div>
                     <h3 style="color: #764ba2;">🏢 Production Architecture</h3>
-                    <div class="feature-card" style="background: #fef3c7;">
-                        <h4>Separation of Concerns</h4>
-                        <pre style="font-size: 0.85em; background: white; padding: 15px; border-radius: 8px;"><code>src/
-├── core/
-│   ├── VoiceAgent.js      <span class="comment"># Core logic only</span>
-│   ├── WebRTCManager.js    <span class="comment"># Connection handling</span>
-│   └── ToolExecutor.js     <span class="comment"># Tool execution</span>
-├── ui/
-│   ├── ChatUI.js           <span class="comment"># Chat interface</span>
-│   ├── AudioVisualizer.js  <span class="comment"># Waveforms</span>
-│   └── OrderStatus.js      <span class="comment"># Order display</span>
-├── services/
-│   ├── api.js              <span class="comment"># Backend calls</span>
-│   └── sessionManager.js   <span class="comment"># State mgmt</span>
-└── config/
-    └── tools.js            <span class="comment"># Tool definitions</span></code></pre>
+                    <div class="feature-card" style="background: #1a1a2e; border: 1px solid #16213e;">
+                        <h4 style="color: #fff;">Separation of Concerns</h4>
+                        <pre style="font-size: 0.85em; background: #0f0f1e; padding: 15px; border-radius: 8px; color: #e0e0e0; border: 1px solid #2a2a3e;"><code><span style="color: #ffd700;">src/</span>
+<span style="color: #e0e0e0;">├── </span><span style="color: #ffd700;">core/</span>
+<span style="color: #e0e0e0;">│   ├── </span><span style="color: #87ceeb;">VoiceAgent.js</span>      <span style="color: #7f8c8d;"># Core logic only</span>
+<span style="color: #e0e0e0;">│   ├── </span><span style="color: #87ceeb;">WebRTCManager.js</span>    <span style="color: #7f8c8d;"># Connection handling</span>
+<span style="color: #e0e0e0;">│   └── </span><span style="color: #87ceeb;">ToolExecutor.js</span>     <span style="color: #7f8c8d;"># Tool execution</span>
+<span style="color: #e0e0e0;">├── </span><span style="color: #ffd700;">ui/</span>
+<span style="color: #e0e0e0;">│   ├── </span><span style="color: #87ceeb;">ChatUI.js</span>           <span style="color: #7f8c8d;"># Chat interface</span>
+<span style="color: #e0e0e0;">│   ├── </span><span style="color: #87ceeb;">AudioVisualizer.js</span>  <span style="color: #7f8c8d;"># Waveforms</span>
+<span style="color: #e0e0e0;">│   └── </span><span style="color: #87ceeb;">OrderStatus.js</span>      <span style="color: #7f8c8d;"># Order display</span>
+<span style="color: #e0e0e0;">├── </span><span style="color: #ffd700;">services/</span>
+<span style="color: #e0e0e0;">│   ├── </span><span style="color: #87ceeb;">api.js</span>              <span style="color: #7f8c8d;"># Backend calls</span>
+<span style="color: #e0e0e0;">│   └── </span><span style="color: #87ceeb;">sessionManager.js</span>   <span style="color: #7f8c8d;"># State mgmt</span>
+<span style="color: #e0e0e0;">└── </span><span style="color: #ffd700;">config/</span>
+<span style="color: #e0e0e0;">    └── </span><span style="color: #87ceeb;">tools.js</span>            <span style="color: #7f8c8d;"># Tool definitions</span></code></pre>
                     </div>
                     
                     <div class="feature-card" style="background: #ede9fe; margin-top: 15px;">
@@ -1252,7 +1310,7 @@ turn_detection: { type: <span class="string">'none'</span> }
             </div>
         </div>
 
-        <!-- Slide 8: Tool Configuration -->
+        <!-- Slide 10: Tool Configuration -->
         <div class="slide">
             <h2>Configuring Tools for the Agent</h2>
             <div class="code-snippet">
@@ -1286,7 +1344,7 @@ turn_detection: { type: <span class="string">'none'</span> }
             </div>
         </div>
 
-        <!-- Slide 9: Tool Execution -->
+        <!-- Slide 11: Tool Execution -->
         <div class="slide">
             <h2>Server-Side Tool Execution</h2>
             <div class="code-snippet">
@@ -1317,7 +1375,7 @@ router.<span class="function">post</span>(<span class="string">'/user'</span>, <
             </div>
         </div>
 
-        <!-- Slide 10: WebRTC vs WebSocket -->
+        <!-- Slide 12: WebRTC vs WebSocket -->
         <div class="slide">
             <h2>Trade-offs: WebRTC vs WebSocket</h2>
             <table class="comparison-table">
@@ -1357,7 +1415,7 @@ router.<span class="function">post</span>(<span class="string">'/user'</span>, <
             </div>
         </div>
 
-        <!-- Slide 11: Interruption Handling -->
+        <!-- Slide 13: Interruption Handling -->
         <div class="slide">
             <h2>How Interruptions Work</h2>
             <div class="diagram">
@@ -1391,7 +1449,7 @@ router.<span class="function">post</span>(<span class="string">'/user'</span>, <
             <p><strong>Key:</strong> OpenAI handles VAD server-side, no client implementation needed!</p>
         </div>
 
-        <!-- Slide 12: Running Tools Locally vs API -->
+        <!-- Slide 14: Running Tools Locally vs API -->
         <div class="slide">
             <h2>Tool Execution Strategies</h2>
             <div class="two-column">
@@ -1423,82 +1481,83 @@ agent.on('tool_call', execute)</code></pre>
             <p style="margin-top: 20px;"><strong>Recommendation:</strong> Start with API approach, optimize if needed</p>
         </div>
 
-        <!-- Slide 13: Infrastructure Choices -->
+        <!-- Slide 15: Understanding STUN vs TURN -->
         <div class="slide">
-            <h2>Infrastructure: Build vs Buy</h2>
-            <table class="comparison-table">
-                <tr>
-                    <th>Component</th>
-                    <th>Build Yourself</th>
-                    <th>Use Service</th>
-                </tr>
-                <tr>
-                    <td>WebRTC Signaling</td>
-                    <td>Direct to OpenAI ✅</td>
-                    <td>LiveKit, Twilio</td>
-                </tr>
-                <tr>
-                    <td>TURN/STUN</td>
-                    <td>Public servers (risky)</td>
-                    <td>Twilio, Xirsys ✅</td>
-                </tr>
-                <tr>
-                    <td>Session Management</td>
-                    <td>In-memory/Redis ✅</td>
-                    <td>Managed Redis</td>
-                </tr>
-                <tr>
-                    <td>Database</td>
-                    <td>SQLite (dev) ✅</td>
-                    <td>PostgreSQL (prod)</td>
-                </tr>
-            </table>
-            <div class="diagram">
-                <p><strong>Our Stack:</strong> Keep it simple for MVP, scale when needed</p>
-                <p>SQLite → PostgreSQL, In-memory → Redis, Public STUN → Managed TURN</p>
-            </div>
-        </div>
-
-        <!-- Slide 13a: STUN vs TURN Explained -->
-        <div class="slide">
-            <h2>Understanding STUN vs TURN</h2>
+            <h2>Network Traversal: STUN vs TURN</h2>
             <p style="text-align: center; color: #999; font-style: italic; margin-bottom: 20px;">
-                🤿 Diving deeper - slightly off topic but fundamental to WebRTC (and why your video calls sometimes fail!)
+                Essential WebRTC infrastructure - Why your calls sometimes fail
             </p>
             
             <div class="two-column">
                 <div class="feature-card">
-                    <h3>🔍 STUN - The Friendly Mirror</h3>
+                    <h3>🔍 STUN - Session Traversal Utilities for NAT</h3>
                     <ul style="font-size: 0.95em;">
-                        <li><strong>What it does:</strong> "Hey, what do I look like from the internet?"</li>
-                        <li><strong>Server replies:</strong> "You're at IP 73.162.x.x port 54321"</li>
-                        <li><strong>Cost:</strong> Free! (Like asking for directions)</li>
+                        <li><strong>Purpose:</strong> Discovers your public IP address</li>
+                        <li><strong>How:</strong> "What's my IP from the internet's perspective?"</li>
+                        <li><strong>Cost:</strong> Free (like asking for directions)</li>
                         <li><strong>Success rate:</strong> ~80% of connections</li>
-                        <li><strong>Fails when:</strong> Corporate firewalls, hotels, airports</li>
+                        <li><strong>Fails when:</strong> Symmetric NAT, strict firewalls</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>🔄 TURN - Traversal Using Relays around NAT</h3>
+                    <ul style="font-size: 0.95em;">
+                        <li><strong>Purpose:</strong> Relays all traffic when direct fails</li>
+                        <li><strong>How:</strong> "I'll forward everything between you"</li>
+                        <li><strong>Cost:</strong> $$$ (bandwidth both directions)</li>
+                        <li><strong>Success rate:</strong> ~99.9% (always works)</li>
+                        <li><strong>Trade-off:</strong> +20-50ms latency, ongoing costs</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="diagram" style="margin-top: 25px; background: #2d3748; color: #e2e8f0; padding: 25px; border-radius: 10px;">
+                <h3 style="color: #f1fa8c; text-align: center; margin-bottom: 20px;">Real-World Analogy 🏢</h3>
+                <p style="text-align: center;"><strong>STUN</strong> = Finding your office building's address<br>
+                <strong>TURN</strong> = Using a courier service when direct delivery fails</p>
+            </div>
+        </div>
+
+        <!-- Slide 16: Infrastructure Implementation -->
+        <div class="slide">
+            <h2>Infrastructure Implementation</h2>
+            
+            <div class="two-column">
+                <div class="feature-card">
+                    <h3>🚀 Our Demo Implementation</h3>
+                    <ul style="font-size: 0.95em;">
+                        <li><strong>STUN:</strong> Free Google servers</li>
+                        <li><strong>WebRTC:</strong> Direct to OpenAI</li>
+                        <li><strong>Session:</strong> In-memory storage</li>
+                        <li><strong>Database:</strong> SQLite file</li>
+                        <li><strong>Auth:</strong> Simple session tokens</li>
                     </ul>
                     <div class="code-snippet" style="margin-top: 15px;">
-                        <pre><code><span class="comment">// What we're using (free Google STUN)</span>
+                        <pre><code><span class="comment">// Demo configuration</span>
 iceServers: [{
   urls: <span class="string">'stun:stun.l.google.com:19302'</span>
 }]</code></pre>
                     </div>
                 </div>
                 <div class="feature-card">
-                    <h3>🔄 TURN - The Expensive Middleman</h3>
+                    <h3>🏭 Production Requirements</h3>
                     <ul style="font-size: 0.95em;">
-                        <li><strong>What it does:</strong> "I'll relay everything for you"</li>
-                        <li><strong>Server says:</strong> "Send to me, I'll forward to them"</li>
-                        <li><strong>Cost:</strong> $$ (Pays for bandwidth both ways)</li>
-                        <li><strong>Success rate:</strong> ~99.9% (always works)</li>
-                        <li><strong>Downside:</strong> +20-50ms latency, costs money</li>
+                        <li><strong>TURN:</strong> Managed service (Twilio/Xirsys)</li>
+                        <li><strong>Session:</strong> Redis with persistence</li>
+                        <li><strong>Database:</strong> PostgreSQL/MySQL</li>
+                        <li><strong>Auth:</strong> OAuth/JWT tokens</li>
+                        <li><strong>Monitoring:</strong> APM + error tracking</li>
                     </ul>
                     <div class="code-snippet" style="margin-top: 15px;">
-                        <pre><code><span class="comment">// What we SHOULD use in production</span>
-iceServers: [{
-  urls: <span class="string">'turn:relay.xirsys.com:80'</span>,
-  username: <span class="string">'your-username'</span>,
-  credential: <span class="string">'your-password'</span>
-}]</code></pre>
+                        <pre><code><span class="comment">// Production configuration</span>
+iceServers: [
+  { urls: <span class="string">'stun:stun.l.google.com:19302'</span> },
+  { 
+    urls: <span class="string">'turn:relay.xirsys.com:80'</span>,
+    username: credentials.username,
+    credential: credentials.password
+  }
+]</code></pre>
                     </div>
                 </div>
             </div>
@@ -1528,7 +1587,7 @@ iceServers: [{
             </div>
         </div>
         
-        <!-- Slide 13b: STUN/TURN in Our Coffee Shop -->
+        <!-- Slide 17: WebRTC Infrastructure: Build vs Buy -->
         <div class="slide">
             <h2>WebRTC Infrastructure: Build vs Buy</h2>
             
@@ -1667,7 +1726,7 @@ room.on('participantConnected',
             </div>
         </div>
 
-        <!-- Slide 13b: MVP Architecture -->
+        <!-- Slide 15a: MVP Architecture -->
         <div class="slide">
             <h2>MVP Architecture (What We Built)</h2>
             <div class="diagram" style="background: #f8f9fa; padding: 30px; border-radius: 15px;">
@@ -1740,7 +1799,7 @@ npm start  <span class="comment"># That's it!</span></code></pre>
             </div>
         </div>
 
-        <!-- Slide 13c: Production Architecture -->
+        <!-- Slide 15b: Production Architecture -->
         <div class="slide">
             <h2>Recommended Production Architecture</h2>
             <div class="diagram" style="background: #f8f9fa; padding: 25px; border-radius: 15px;">
@@ -1871,7 +1930,7 @@ npm start  <span class="comment"># That's it!</span></code></pre>
             </div>
         </div>
 
-        <!-- Slide 14: Audio Visualization -->
+        <!-- Slide 18: Audio Visualization -->
         <div class="slide">
             <h2>Real-Time Audio Visualization</h2>
             <div class="code-snippet">
@@ -1901,7 +1960,7 @@ source.<span class="function">connect</span>(<span class="keyword">this</span>.m
             <p><strong>Purpose:</strong> Visual feedback builds user confidence in the connection</p>
         </div>
 
-        <!-- Slide 15: Session & State Management -->
+        <!-- Slide 19: Session & State Management -->
         <div class="slide">
             <h2>Managing Session State</h2>
             <div class="code-snippet">
@@ -1938,77 +1997,60 @@ source.<span class="function">connect</span>(<span class="keyword">this</span>.m
             </div>
         </div>
 
-        <!-- Slide 16: Error Handling & Edge Cases -->
+        <!-- Slide 20: Bringing It All Together -->
         <div class="slide">
-            <h2>Production Considerations</h2>
-            <div class="two-column">
-                <div>
-                    <h3>Error Handling</h3>
-                    <ul>
-                        <li>Network disconnections</li>
-                        <li>API rate limits</li>
-                        <li>Invalid tool calls</li>
-                        <li>Database failures</li>
-                    </ul>
-                </div>
-                <div>
-                    <h3>Edge Cases</h3>
-                    <ul>
-                        <li>Multiple simultaneous orders</li>
-                        <li>Session timeout during order</li>
-                        <li>Conflicting user names</li>
-                        <li>Background noise/music</li>
-                    </ul>
+            <h2>Bringing It All Together</h2>
+            <div class="diagram" style="background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%); padding: 30px; border-radius: 15px; margin-bottom: 30px;">
+                <h3 style="text-align: center; color: #667eea; margin-bottom: 25px;">What You've Learned So Far</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                    <div class="feature-card" style="background: white;">
+                        <h4 style="color: #667eea;">🌐 Network Layer</h4>
+                        <ul style="font-size: 0.9em;">
+                            <li>✅ WebRTC direct connection</li>
+                            <li>✅ STUN for NAT traversal</li>
+                            <li>✅ Ephemeral token auth</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card" style="background: white;">
+                        <h4 style="color: #764ba2;">🏭 Infrastructure</h4>
+                        <ul style="font-size: 0.9em;">
+                            <li>✅ Express.js server</li>
+                            <li>✅ SQLite database</li>
+                            <li>✅ Session management</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card" style="background: white;">
+                        <h4 style="color: #10a37f;">🤖 AI Integration</h4>
+                        <ul style="font-size: 0.9em;">
+                            <li>✅ OpenAI Realtime API</li>
+                            <li>✅ Tool calling system</li>
+                            <li>✅ Voice selection</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card" style="background: white;">
+                        <h4 style="color: #f5576c;">🎮 User Experience</h4>
+                        <ul style="font-size: 0.9em;">
+                            <li>✅ Audio visualization</li>
+                            <li>✅ Interruption handling</li>
+                            <li>✅ Natural conversation</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-            <div class="code-snippet">
-                <span class="code-lang">Error Recovery</span>
-                <pre><code><span class="keyword">this</span>.pc.<span class="function">onconnectionstatechange</span> = () => {
-  <span class="keyword">if</span> (<span class="keyword">this</span>.pc.connectionState === <span class="string">'failed'</span>) {
-    <span class="keyword">this</span>.<span class="function">attemptReconnect</span>();
-  }
-};
-
-<span class="keyword">this</span>.dc.<span class="function">onerror</span> = (error) => {
-  console.<span class="function">error</span>(<span class="string">'DataChannel error:'</span>, error);
-  <span class="keyword">this</span>.<span class="function">handleToolError</span>(error);
-};</code></pre>
+            
+            <div class="demo-placeholder" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h3 style="margin-bottom: 15px;">🎆 Ready for the Magic?</h3>
+                <p style="font-size: 1.2em;">Let's see it all work together in a real conversation!</p>
             </div>
+            
+            <p style="text-align: center; margin-top: 30px; font-size: 1.2em;">
+                <strong>Coming up:</strong> Live ordering experience with the Brew & Byte Café voice agent
+            </p>
         </div>
 
-        <!-- Slide 17: Performance Optimizations -->
+        <!-- Slide 21: Live Demo Architecture -->
         <div class="slide">
-            <h2>Performance Optimizations</h2>
-            <div class="timeline">
-                <div class="timeline-item">
-                    <strong>Connection pooling</strong> - Reuse database connections
-                </div>
-                <div class="timeline-item">
-                    <strong>Response caching</strong> - Cache menu and static data
-                </div>
-                <div class="timeline-item">
-                    <strong>Batch operations</strong> - Group database writes
-                </div>
-                <div class="timeline-item">
-                    <strong>CDN for assets</strong> - Serve static files from edge
-                </div>
-            </div>
-            <h3>Monitoring Setup</h3>
-            <pre><code><span class="comment">// Track key metrics</span>
-<span class="keyword">const</span> metrics = {
-  sessionDuration: [],
-  toolCallLatency: [],
-  orderCompletionRate: <span class="number">0</span>,
-  apiErrors: []
-};</code></pre>
-            <div class="demo-placeholder">
-                🎭 DEMO: Show real-time metrics dashboard
-            </div>
-        </div>
-
-        <!-- Slide 18: Live Demo Architecture -->
-        <div class="slide">
-            <h2>Live Demo Time!</h2>
+            <h2>🎭 Live Demo: Order Your Coffee!</h2>
             <div class="timeline">
                 <div class="timeline-item">
                     <strong>1. Initial Connection</strong> - Show WebRTC negotiation
@@ -2028,11 +2070,103 @@ source.<span class="function">connect</span>(<span class="keyword">this</span>.m
             </div>
             <div class="demo-placeholder">
                 🚀 LIVE DEMO: Full ordering flow with interruptions
+                <br><br>
+                <a href="https://share.cleanshot.com/L3B8vwhn" target="_blank" style="color: white; text-decoration: underline; font-size: 0.8em;">
+                    📹 Video Recording (backup for network issues)
+                </a>
             </div>
             <p style="margin-top: 30px;"><strong>Watch for:</strong> Latency, interruption handling, tool calls</p>
         </div>
 
-        <!-- Slide 19: Lessons Learned -->
+        <!-- Slide 22: Advanced Features & Enhancements -->
+        <div class="slide">
+            <h2>Advanced Features: Taking It Further</h2>
+            <div class="diagram" style="background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%); padding: 25px; border-radius: 15px; margin-bottom: 25px;">
+                <h3 style="text-align: center; color: #667eea; margin-bottom: 25px;">OpenAI Agents SDK Capabilities</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="feature-card" style="background: white;">
+                        <h4 style="color: #667eea;">🤝 Handoffs Between Agents</h4>
+                        <p style="font-size: 0.9em; margin-bottom: 10px;">Delegate to specialized agents for complex tasks</p>
+                        <div class="code-snippet">
+                            <pre style="font-size: 0.8em;"><code><span class="keyword">const</span> mathTutorAgent = <span class="keyword">new</span> <span class="function">RealtimeAgent</span>({
+  name: <span class="string">'Math Tutor'</span>,
+  handoffDescription: <span class="string">'Math specialist'</span>
+});
+
+<span class="keyword">const</span> mainAgent = <span class="keyword">new</span> <span class="function">RealtimeAgent</span>({
+  handoffs: [mathTutorAgent]
+});</code></pre>
+                        </div>
+                    </div>
+                    <div class="feature-card" style="background: white;">
+                        <h4 style="color: #764ba2;">✅ Tool Approval Workflow</h4>
+                        <p style="font-size: 0.9em; margin-bottom: 10px;">Require user confirmation for sensitive actions</p>
+                        <div class="code-snippet">
+                            <pre style="font-size: 0.8em;"><code>session.<span class="function">on</span>(<span class="string">'tool_approval_requested'</span>, 
+  (context, agent, request) => {
+    <span class="comment">// Show UI for approval</span>
+    <span class="keyword">if</span> (userApproves) {
+      session.<span class="function">approve</span>(request.approvalItem);
+    }
+});</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="two-column">
+                <div class="feature-card">
+                    <h3>🎯 Multi-Modal Capabilities</h3>
+                    <ul style="font-size: 0.95em;">
+                        <li><strong>Text + Voice</strong> hybrid input</li>
+                        <li><strong>Image understanding</strong> for menu items</li>
+                        <li><strong>Screen sharing</strong> for support</li>
+                        <li><strong>Document processing</strong> (receipts)</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>🤖 AI Enhancements</h3>
+                    <ul style="font-size: 0.95em;">
+                        <li><strong>Voice cloning</strong> for brand voice</li>
+                        <li><strong>Sentiment analysis</strong> for routing</li>
+                        <li><strong>Predictive ordering</strong> with ML</li>
+                        <li><strong>Dynamic pricing</strong> optimization</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="feature-card" style="margin-top: 20px; background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);">
+                <h3 style="color: #92400e;">📚 Integration Opportunities</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
+                    <div>
+                        <strong>POS Systems:</strong>
+                        <ul style="font-size: 0.85em; margin-top: 5px;">
+                            <li>Square</li>
+                            <li>Toast</li>
+                            <li>Clover</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong>Communications:</strong>
+                        <ul style="font-size: 0.85em; margin-top: 5px;">
+                            <li>Twilio (SMS/Phone)</li>
+                            <li>WhatsApp Business</li>
+                            <li>Slack/Teams</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong>Analytics:</strong>
+                        <ul style="font-size: 0.85em; margin-top: 5px;">
+                            <li>Segment</li>
+                            <li>Mixpanel</li>
+                            <li>Amplitude</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 23: Lessons Learned -->
         <div class="slide">
             <h2>Key Takeaways</h2>
             <div class="two-column">
@@ -2055,40 +2189,34 @@ source.<span class="function">connect</span>(<span class="keyword">this</span>.m
                     </ul>
                 </div>
             </div>
-            <h3>Future Improvements</h3>
+            <h3>Next Steps for Your Implementation</h3>
             <ul>
-                <li>🎯 Multi-language support</li>
-                <li>🎯 Voice cloning for brand consistency</li>
-                <li>🎯 Advanced personalization with ML</li>
-                <li>🎯 Integration with POS systems</li>
+                <li>✅ Start with the MVP architecture</li>
+                <li>✅ Add TURN servers for reliability</li>
+                <li>✅ Implement guardrails before launch</li>
+                <li>✅ Set up monitoring and analytics</li>
+                <li>✅ Test with real users iteratively</li>
             </ul>
         </div>
 
-        <!-- Slide 20: Resources & Q&A -->
+        <!-- Slide 24: Resources & Q&A -->
         <div class="slide">
             <h2>Resources & Questions</h2>
-            <div class="diagram">
+            <div class="diagram" style="margin-top: 40px;">
                 <h3>Code & Documentation</h3>
                 <ul style="list-style: none; font-size: 1.2em;">
                     <li>📦 <strong>GitHub:</strong> <a href="https://github.com/wickdninja/agent-sdk">github.com/wickdninja/agent-sdk</a></li>
-                    <li>📚 <strong>OpenAI Docs:</strong> platform.openai.com/docs/guides/realtime</li>
-                    <li>🔧 <strong>WebRTC Guide:</strong> webrtc.org</li>
+                    <li>📚 <strong>OpenAI Agents JS:</strong> <a href="https://openai.github.io/openai-agents-js/">openai.github.io/openai-agents-js</a></li>
+                    <li>🎯 <strong>Voice Agents Guide:</strong> <a href="https://platform.openai.com/docs/guides/voice-agents">platform.openai.com/docs/guides/voice-agents</a></li>
+                    <li>🚀 <strong>Quickstart:</strong> <a href="https://openai.github.io/openai-agents-js/guides/voice-agents/quickstart/">Voice Agents Quickstart</a></li>
+                    <li>🔧 <strong>Transport Layer:</strong> <a href="https://openai.github.io/openai-agents-js/guides/voice-agents/transport">WebRTC Transport Guide</a></li>
                 </ul>
             </div>
-            <div class="two-column" style="margin-top: 40px;">
-                <div class="feature-card">
-                    <h3>Quick Start</h3>
-                    <pre><code>npm install
-npm run dev
-# Visit localhost:3001</code></pre>
-                </div>
-                <div class="feature-card">
-                    <h3>Contact</h3>
-                    <p>Email: contact@nateross.dev</p>
-                    <p>Blog: nateross.dev/blog</p>
-                </div>
+            <div class="feature-card" style="margin-top: 40px; max-width: 800px; margin-left: auto; margin-right: auto;">
+                <h3>Contact</h3>
+                <p>Email: contact@nateross.dev</p>
+                <p>Blog: <a href="https://nateross.dev/blog">nateross.dev/blog</a></p>
             </div>
-            <h2 style="margin-top: 40px; text-align: center;" class="highlight">Questions?</h2>
         </div>
     </div>
 
