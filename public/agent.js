@@ -315,6 +315,9 @@ class RealtimeVoiceAgent {
         const sessionUpdate = {
             type: 'session.update',
             session: {
+                input_audio_transcription: {
+                    model: 'whisper-1'
+                },
                 instructions: `You are Bella, a friendly and knowledgeable barista at Brew & Byte Café.
 
 IMPORTANT WORKFLOW:
@@ -407,21 +410,44 @@ Remember: Keep the conversation natural and friendly. You're having a real conve
             case 'conversation.item.created':
                 console.log('Conversation item created:', event);
                 if (event.item.role === 'user') {
-                    // Handle user input - could be audio or message
+                    console.log('User item details:', {
+                        type: event.item.type,
+                        content: event.item.content,
+                        formatted: event.item.formatted,
+                        transcript: event.item.transcript,
+                        full_item: event.item
+                    });
+                    
+                    // Handle different types of user input
                     if (event.item.type === 'message' && event.item.content && event.item.content[0]) {
-                        const inputText = event.item.content[0].text;
-                        // Only add if it's from input_text (programmatic input), not from audio
-                        if (inputText && event.item.content[0].type === 'input_text') {
-                            // Check if message isn't already displayed
-                            const lastMessage = this.chatMessages.lastElementChild;
-                            const lastMessageText = lastMessage?.textContent || '';
-                            if (!lastMessageText.includes(inputText)) {
-                                this.addMessage('You', inputText);
-                            }
+                        const content = event.item.content[0];
+                        
+                        // Check if this is text input or audio transcript
+                        if (content.type === 'input_text' && content.text) {
+                            // Programmatic text input (from suggestions, etc)
+                            this.addMessage('You', content.text);
+                        } else if (content.type === 'input_audio' && content.transcript) {
+                            // Audio with transcript in content
+                            this.addMessage('You', content.transcript);
+                        } else if (content.transcript) {
+                            // Transcript might be directly in content
+                            this.addMessage('You', content.transcript);
                         }
-                    } else if (event.item.type === 'input_audio') {
-                        // Audio input will be transcribed later
-                        console.log('User audio input detected');
+                    } else if (event.item.type === 'message' && event.item.formatted) {
+                        // Some messages come with formatted content
+                        if (event.item.formatted.transcript) {
+                            this.addMessage('You', event.item.formatted.transcript);
+                        }
+                    } else if (event.item.type === 'message' && event.item.transcript) {
+                        // Transcript might be at the item level
+                        this.addMessage('You', event.item.transcript);
+                    }
+                    
+                    // Special handling for input_audio items - they don't have transcript yet
+                    if (event.item.type === 'input_audio') {
+                        console.log('Input audio item created - transcript will come via transcription event');
+                        // Store the item ID so we can match it with the transcription later
+                        this.pendingUserTranscriptItemId = event.item.id;
                     }
                 } else if (event.item.role === 'assistant' && event.item.type === 'message') {
                     if (event.item.content && event.item.content[0]) {
@@ -445,16 +471,26 @@ Remember: Keep the conversation natural and friendly. You're having a real conve
                 
             case 'conversation.item.input_audio_transcription.completed':
                 console.log('User audio transcription completed:', event);
-                // Only add message if it's not already displayed
+                console.log('Transcript content:', event.transcript);
+                // Display the user's transcribed message
                 if (event.transcript && event.transcript.trim()) {
-                    // Check if we just added this message from text input
-                    const lastMessage = this.chatMessages.lastElementChild;
-                    const lastMessageText = lastMessage?.textContent || '';
-                    if (!lastMessageText.includes(event.transcript)) {
-                        this.addMessage('You', event.transcript);
-                    }
+                    this.addMessage('You', event.transcript);
                 } else {
-                    this.addMessage('You', '🎤 [Audio message]');
+                    console.log('No transcript in completed event');
+                }
+                break;
+                
+            case 'conversation.item.input_audio_transcription.failed':
+                console.log('User audio transcription failed:', event);
+                // Show that audio was received but couldn't be transcribed
+                this.addMessage('You', '🎤 [Audio message - transcription unavailable]');
+                break;
+                
+            case 'input_audio_transcription.completed':
+                // Alternative event name format
+                console.log('User audio transcription completed (alt format):', event);
+                if (event.transcript && event.transcript.trim()) {
+                    this.addMessage('You', event.transcript);
                 }
                 break;
                 
