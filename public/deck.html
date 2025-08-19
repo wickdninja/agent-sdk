@@ -1938,74 +1938,6 @@ source.<span class="function">connect</span>(<span class="keyword">this</span>.m
             </div>
         </div>
 
-        <!-- Slide 16: Error Handling & Edge Cases -->
-        <div class="slide">
-            <h2>Production Considerations</h2>
-            <div class="two-column">
-                <div>
-                    <h3>Error Handling</h3>
-                    <ul>
-                        <li>Network disconnections</li>
-                        <li>API rate limits</li>
-                        <li>Invalid tool calls</li>
-                        <li>Database failures</li>
-                    </ul>
-                </div>
-                <div>
-                    <h3>Edge Cases</h3>
-                    <ul>
-                        <li>Multiple simultaneous orders</li>
-                        <li>Session timeout during order</li>
-                        <li>Conflicting user names</li>
-                        <li>Background noise/music</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="code-snippet">
-                <span class="code-lang">Error Recovery</span>
-                <pre><code><span class="keyword">this</span>.pc.<span class="function">onconnectionstatechange</span> = () => {
-  <span class="keyword">if</span> (<span class="keyword">this</span>.pc.connectionState === <span class="string">'failed'</span>) {
-    <span class="keyword">this</span>.<span class="function">attemptReconnect</span>();
-  }
-};
-
-<span class="keyword">this</span>.dc.<span class="function">onerror</span> = (error) => {
-  console.<span class="function">error</span>(<span class="string">'DataChannel error:'</span>, error);
-  <span class="keyword">this</span>.<span class="function">handleToolError</span>(error);
-};</code></pre>
-            </div>
-        </div>
-
-        <!-- Slide 17: Performance Optimizations -->
-        <div class="slide">
-            <h2>Performance Optimizations</h2>
-            <div class="timeline">
-                <div class="timeline-item">
-                    <strong>Connection pooling</strong> - Reuse database connections
-                </div>
-                <div class="timeline-item">
-                    <strong>Response caching</strong> - Cache menu and static data
-                </div>
-                <div class="timeline-item">
-                    <strong>Batch operations</strong> - Group database writes
-                </div>
-                <div class="timeline-item">
-                    <strong>CDN for assets</strong> - Serve static files from edge
-                </div>
-            </div>
-            <h3>Monitoring Setup</h3>
-            <pre><code><span class="comment">// Track key metrics</span>
-<span class="keyword">const</span> metrics = {
-  sessionDuration: [],
-  toolCallLatency: [],
-  orderCompletionRate: <span class="number">0</span>,
-  apiErrors: []
-};</code></pre>
-            <div class="demo-placeholder">
-                🎭 DEMO: Show real-time metrics dashboard
-            </div>
-        </div>
-
         <!-- Slide 18: Live Demo Architecture -->
         <div class="slide">
             <h2>Live Demo Time!</h2>
@@ -2067,7 +1999,8 @@ source.<span class="function">connect</span>(<span class="keyword">this</span>.m
         <!-- Slide 20: Resources & Q&A -->
         <div class="slide">
             <h2>Resources & Questions</h2>
-            <div class="diagram">
+            <h2 style="margin-top: 30px; text-align: center;" class="highlight">Questions?</h2>
+            <div class="diagram" style="margin-top: 40px;">
                 <h3>Code & Documentation</h3>
                 <ul style="list-style: none; font-size: 1.2em;">
                     <li>📦 <strong>GitHub:</strong> <a href="https://github.com/wickdninja/agent-sdk">github.com/wickdninja/agent-sdk</a></li>
@@ -2078,17 +2011,16 @@ source.<span class="function">connect</span>(<span class="keyword">this</span>.m
             <div class="two-column" style="margin-top: 40px;">
                 <div class="feature-card">
                     <h3>Quick Start</h3>
-                    <pre><code>npm install
-npm run dev
+                    <pre><code>yarn install
+yarn dev
 # Visit localhost:3001</code></pre>
                 </div>
                 <div class="feature-card">
                     <h3>Contact</h3>
                     <p>Email: contact@nateross.dev</p>
-                    <p>Blog: nateross.dev/blog</p>
+                    <p>Blog: <a href="https://nateross.dev/blog">nateross.dev/blog</a></p>
                 </div>
             </div>
-            <h2 style="margin-top: 40px; text-align: center;" class="highlight">Questions?</h2>
         </div>
     </div>
 
