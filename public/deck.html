@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building a Real-Time Voice Agent with OpenAI SDK</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .slide {
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 60px;
+            display: none;
+            flex-direction: column;
+            animation: slideIn 0.5s ease-out;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 2.2em;
+            color: #764ba2;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        h3 {
+            font-size: 1.8em;
+            color: #667eea;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        p, li {
+            font-size: 1.3em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        ul {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 30px;
+            color: #667eea;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: #667eea;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .timer {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: #764ba2;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .diagram {
+            margin: 30px 0;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .architecture-diagram {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .component {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 150px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .arrow {
+            font-size: 2em;
+            color: #667eea;
+        }
+
+        .demo-placeholder {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 30px 0;
+            font-size: 1.4em;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .comparison-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+
+        .comparison-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-size: 1.1em;
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 1em;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .code-snippet {
+            position: relative;
+        }
+
+        .code-lang {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+            margin: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #667eea;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -34px;
+            top: 5px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #667eea;
+            border: 3px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Syntax highlighting */
+        .keyword { color: #ff79c6; }
+        .string { color: #f1fa8c; }
+        .comment { color: #6272a4; }
+        .function { color: #50fa7b; }
+        .number { color: #bd93f9; }
+    </style>
+</head>
+<body>
+    <!-- Timer Display -->
+    <div class="timer" id="timer">00:00</div>
+    
+    <!-- Slide Number -->
+    <div class="slide-number" id="slideNumber">1 / 31</div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <h1>Building a Real-Time Voice Agent with OpenAI SDK</h1>
+            <h3 style="color: #764ba2;">From WebRTC to Production in 15 Minutes</h3>
+            <div style="margin-top: auto;">
+                <p style="font-size: 1.5em; color: #667eea;">☕ Brew & Byte Café</p>
+                <p>A practical implementation guide</p>
+                <p style="margin-top: 30px; color: #999;">Press SPACE or → to navigate</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: What We're Building -->
+        <div class="slide">
+            <h2>What We're Building Today</h2>
+            <div class="two-column">
+                <div>
+                    <h3>The Product</h3>
+                    <ul>
+                        <li>AI-powered coffee shop voice assistant</li>
+                        <li>Real-time order taking via WebRTC</li>
+                        <li>Natural conversation with interruption handling</li>
+                        <li>Tool calling for menu, orders, and user management</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Tech Stack</h3>
+                    <ul>
+                        <li>OpenAI Realtime API (GPT-4o)</li>
+                        <li>WebRTC for voice streaming</li>
+                        <li>Node.js + Express backend</li>
+                        <li>SQLite for persistence</li>
+                        <li>Vanilla JS frontend</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="demo-placeholder">
+                🎭 DEMO: Show the live Brew & Byte Café interface
+            </div>
+        </div>
+
+        <!-- Slide 3: Architecture Overview -->
+        <div class="slide">
+            <h2>System Architecture</h2>
+            <div class="architecture-diagram">
+                <div class="component">
+                    <h4>Browser</h4>
+                    <p style="font-size: 0.9em;">Audio + WebRTC</p>
+                </div>
+                <span class="arrow">→</span>
+                <div class="component">
+                    <h4>OpenAI</h4>
+                    <p style="font-size: 0.9em;">Realtime API</p>
+                </div>
+                <span class="arrow">↔</span>
+                <div class="component">
+                    <h4>Express Server</h4>
+                    <p style="font-size: 0.9em;">Tools + Auth</p>
+                </div>
+                <span class="arrow">→</span>
+                <div class="component">
+                    <h4>SQLite</h4>
+                    <p style="font-size: 0.9em;">Orders + Users</p>
+                </div>
+            </div>
+            <div class="diagram">
+                <p><strong>Key Design Decision:</strong> Direct WebRTC connection from browser to OpenAI</p>
+                <p>Our server only handles: Authentication, Tool execution, Data persistence</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: Setting Up the Project -->
+        <div class="slide">
+            <h2>Project Setup</h2>
+            <div class="code-snippet">
+                <span class="code-lang">package.json</span>
+                <pre><code><span class="comment">// Core dependencies from our implementation</span>
+{
+  <span class="string">"name"</span>: <span class="string">"vanilla-brew-byte"</span>,
+  <span class="string">"dependencies"</span>: {
+    <span class="string">"express"</span>: <span class="string">"^4.18.2"</span>,     <span class="comment">// Web server</span>
+    <span class="string">"sqlite3"</span>: <span class="string">"^5.1.7"</span>,     <span class="comment">// Database</span>
+    <span class="string">"dotenv"</span>: <span class="string">"^16.3.1"</span>,      <span class="comment">// Environment vars</span>
+    <span class="string">"cors"</span>: <span class="string">"^2.8.5"</span>,         <span class="comment">// CORS handling</span>
+    <span class="string">"node-fetch"</span>: <span class="string">"^2.7.0"</span>   <span class="comment">// HTTP client</span>
+  }
+}</code></pre>
+            </div>
+            <h3>Environment Setup</h3>
+            <pre><code><span class="comment"># .env file</span>
+OPENAI_API_KEY=sk-...
+PORT=3001</code></pre>
+        </div>
+
+        <!-- Slide 5: Server Implementation -->
+        <div class="slide">
+            <h2>Server Architecture</h2>
+            <div class="code-snippet">
+                <span class="code-lang">server.js</span>
+                <pre><code><span class="keyword">const</span> express = <span class="function">require</span>(<span class="string">'express'</span>);
+<span class="keyword">const</span> app = <span class="function">express</span>();
+
+<span class="comment">// Modular route structure</span>
+app.<span class="function">use</span>(<span class="string">'/api/session'</span>, sessionRoutes);    <span class="comment">// WebRTC token</span>
+app.<span class="function">use</span>(<span class="string">'/api/tools'</span>, toolsRoutes);        <span class="comment">// Tool endpoints</span>
+app.<span class="function">use</span>(<span class="string">'/api/orders'</span>, ordersRoutes);      <span class="comment">// Order management</span>
+app.<span class="function">use</span>(<span class="string">'/api/analytics'</span>, analyticsRoutes); <span class="comment">// Reporting</span>
+
+<span class="comment">// Database initialization</span>
+<span class="keyword">async function</span> <span class="function">startServer</span>() {
+  <span class="keyword">await</span> db.<span class="function">initDatabase</span>();
+  app.<span class="function">listen</span>(PORT, () => {
+    console.<span class="function">log</span>(<span class="string">`✅ Server running on port ${PORT}`</span>);
+  });
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- Slide 6: WebRTC Session Creation Overview -->
+        <div class="slide">
+            <h2>Creating WebRTC Sessions - Overview</h2>
+            <div class="code-snippet">
+                <span class="code-lang">routes/session.js</span>
+                <pre><code><span class="comment">// Ephemeral token endpoint for WebRTC</span>
+router.<span class="function">get</span>(<span class="string">'/'</span>, <span class="keyword">async</span> (req, res) => {
+  <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(
+    <span class="string">'https://api.openai.com/v1/realtime/sessions'</span>,
+    {
+      method: <span class="string">'POST'</span>,
+      headers: {
+        Authorization: <span class="string">`Bearer ${OPENAI_API_KEY}`</span>,
+      },
+      body: JSON.<span class="function">stringify</span>({
+        model: <span class="string">'gpt-4o-realtime-preview-2024-12-17'</span>,
+        voice: <span class="string">'alloy'</span>,
+      }),
+    }
+  );
+  
+  <span class="keyword">const</span> data = <span class="keyword">await</span> response.<span class="function">json</span>();
+  <span class="keyword">const</span> sessionId = sessionManager.<span class="function">generateSessionId</span>();
+  
+  res.<span class="function">json</span>({ ...data, sessionId });
+});</code></pre>
+            </div>
+            <p><strong>Key Point:</strong> Server creates ephemeral tokens, browser connects directly to OpenAI</p>
+        </div>
+
+        <!-- Slide 6a: Why Ephemeral Tokens -->
+        <div class="slide">
+            <h2>Why Ephemeral Tokens?</h2>
+            <div class="two-column">
+                <div class="feature-card">
+                    <h3>🔐 Security Benefits</h3>
+                    <ul>
+                        <li><strong>No API key exposure</strong> - Keys stay server-side only</li>
+                        <li><strong>Short-lived access</strong> - Tokens have a short (TTL) </li>
+                        <li><strong>Per-session auth</strong> - Each session gets unique token</li>
+                        <li><strong>Rate limiting</strong> - Control requests per user/IP</li>
+                        <li><strong>Audit trail</strong> - Track usage per session/user</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>❌ Without Tokens (Server Agent)</h3>
+                    <ul>
+                        <li>All audio must proxy through server</li>
+                        <li>Higher latency (2x network hops)</li>
+                        <li>Increased server costs (bandwidth)</li>
+                        <li>Complex WebSocket state management</li>
+                        <li>Scaling requires media servers</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="code-snippet">
+                <span class="code-lang">Token Response</span>
+                <pre><code>{
+  <span class="string">"client_secret"</span>: {
+    <span class="string">"value"</span>: <span class="string">"eph_abc123..."</span>,  <span class="comment">// Short-lived token</span>
+    <span class="string">"expires_at"</span>: <span class="number">1234567890</span>      <span class="comment">// Unix timestamp</span>
+  },
+  <span class="comment">// WebRTC offer/answer for connection setup</span>
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- Slide 6b: Model Selection -->
+        <div class="slide">
+            <h2>Choosing the Right Model</h2>
+            <div class="diagram">
+                <h3>OpenAI Realtime Models & Pricing</h3>
+                <table class="comparison-table">
+                    <tr>
+                        <th>Model</th>
+                        <th>Audio Input</th>
+                        <th>Audio Output</th>
+                        <th>Use Case</th>
+                    </tr>
+                    <tr>
+                        <td><code>gpt-4o-realtime-preview</code> ✅</td>
+                        <td>$40/1M tokens</td>
+                        <td>$80/1M tokens</td>
+                        <td>Production voice agents</td>
+                    </tr>
+                    <tr>
+                        <td><code>gpt-4o-mini-realtime-preview</code></td>
+                        <td>$10/1M tokens</td>
+                        <td>$20/1M tokens</td>
+                        <td>Cost-effective agents</td>
+                    </tr>
+                    <tr>
+                        <td><code>gpt-4o-audio-preview</code></td>
+                        <td>$40/1M tokens</td>
+                        <td>$80/1M tokens</td>
+                        <td>Audio processing tasks</td>
+                    </tr>
+                    <tr>
+                        <td><code>gpt-4o-mini-audio-preview</code></td>
+                        <td>$10/1M tokens</td>
+                        <td>$20/1M tokens</td>
+                        <td>Simple audio tasks</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="two-column">
+                <div class="feature-card">
+                    <h3>Cost Breakdown</h3>
+                    <ul style="font-size: 0.95em;">
+                        <li><strong>1 minute conversation:</strong></li>
+                        <li>~1000 audio tokens = $0.04-0.08</li>
+                        <li><strong>100 calls/day:</strong></li>
+                        <li>~$120-240/month (gpt-4o)</li>
+                        <li>~$30-60/month (mini)</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>Why gpt-4o-realtime?</h3>
+                    <ul style="font-size: 0.95em;">
+                        <li>⚡ <strong>Best latency</strong> - Sub-300ms</li>
+                        <li>🎯 <strong>Superior accuracy</strong> - Complex orders</li>
+                        <li>🔧 <strong>Tool calling</strong> - Native support</li>
+                        <li>🎭 <strong>Interruptions</strong> - Seamless handling</li>
+                    </ul>
+                </div>
+            </div>
+            <p style="margin-top: 20px;"><strong>💡 Tip:</strong> Start with mini for testing, upgrade to gpt-4o for production quality</p>
+        </div>
+
+        <!-- Slide 6c: Voice Selection -->
+        <div class="slide">
+            <h2>Voice Selection & Personality</h2>
+            <div class="two-column">
+                <div>
+                    <h3>Available Voices</h3>
+                    <table class="comparison-table" style="font-size: 0.9em;">
+                        <tr>
+                            <th>Voice</th>
+                            <th>Character</th>
+                        </tr>
+                        <tr>
+                            <td><strong>alloy</strong> ✅</td>
+                            <td>Neutral, professional</td>
+                        </tr>
+                        <tr>
+                            <td>echo</td>
+                            <td>Warm, conversational</td>
+                        </tr>
+                        <tr>
+                            <td>shimmer</td>
+                            <td>Friendly, enthusiastic</td>
+                        </tr>
+                        <tr>
+                            <td>ash</td>
+                            <td>Calm, composed</td>
+                        </tr>
+                        <tr>
+                            <td>ballad</td>
+                            <td>Smooth, narrative</td>
+                        </tr>
+                        <tr>
+                            <td>coral</td>
+                            <td>Pleasant, clear</td>
+                        </tr>
+                        <tr>
+                            <td>sage</td>
+                            <td>Authoritative, wise</td>
+                        </tr>
+                        <tr>
+                            <td>verse</td>
+                            <td>Dynamic, expressive</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="feature-card">
+                    <h3>Why We Chose "Alloy"</h3>
+                    <ul>
+                        <li>📢 <strong>Clear articulation</strong> - Best for orders</li>
+                        <li>🎯 <strong>Gender neutral</strong> - Wide appeal</li>
+                        <li>☕ <strong>Professional tone</strong> - Fits coffee shop</li>
+                        <li>🌍 <strong>Accent neutral</strong> - Universal understanding</li>
+                    </ul>
+                    <div class="code-snippet" style="margin-top: 20px;">
+                        <span class="code-lang">Dynamic Voice Selection</span>
+                        <pre><code><span class="comment">// Could personalize per user</span>
+<span class="keyword">const</span> voice = user.preferences?.voice 
+  || getVoiceByTimeOfDay() 
+  || <span class="string">'alloy'</span>;</code></pre>
+                    </div>
+                </div>
+            </div>
+            <p style="margin-top: 20px;"><strong>Future:</strong> Voice cloning API to match your brand's unique voice</p>
+        </div>
+
+        <!-- Slide 6d: Session Manager -->
+        <div class="slide">
+            <h2>Why We Need Session Management</h2>
+            <div class="architecture-diagram">
+                <div class="component">
+                    <h4>Browser</h4>
+                    <p style="font-size: 0.9em;">WebRTC</p>
+                </div>
+                <span class="arrow">↔</span>
+                <div class="component" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <h4>Session Manager</h4>
+                    <p style="font-size: 0.9em;">State & Context</p>
+                </div>
+                <span class="arrow">↔</span>
+                <div class="component">
+                    <h4>OpenAI</h4>
+                    <p style="font-size: 0.9em;">Stateless</p>
+                </div>
+            </div>
+            
+            <div class="two-column" style="margin-top: 30px;">
+                <div class="feature-card">
+                    <h3>Problem: OpenAI is Stateless</h3>
+                    <ul>
+                        <li>No user context between calls</li>
+                        <li>No order persistence</li>
+                        <li>No session tracking</li>
+                        <li>Tools can't share data</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>Solution: Session Manager</h3>
+                    <ul>
+                        <li>✅ Track user across tools</li>
+                        <li>✅ Maintain order state</li>
+                        <li>✅ Store context/preferences</li>
+                        <li>✅ Enable personalization</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="code-snippet">
+                <span class="code-lang">Session Manager Benefits</span>
+                <pre><code><span class="comment">// Links WebRTC session → User → Order</span>
+<span class="keyword">const</span> session = {
+  sessionId: <span class="string">'sess_abc123'</span>,      <span class="comment">// Our tracking ID</span>
+  userId: <span class="string">'user_john_doe'</span>,       <span class="comment">// Persistent user</span>
+  currentOrder: { items: [...] },  <span class="comment">// Order in progress</span>
+  context: { 
+    previousItems: [...],          <span class="comment">// For suggestions</span>
+    preferences: {...}              <span class="comment">// Customizations</span>
+  }
+};</code></pre>
+            </div>
+        </div>
+
+        <!-- Slide 7: Client-Side WebRTC Implementation -->
+        <div class="slide">
+            <h2>Client WebRTC Implementation: Step by Step</h2>
+            <div class="code-snippet">
+                <span class="code-lang">agent.js - Annotated Connection Flow</span>
+                <pre><code><span class="keyword">class</span> <span class="function">RealtimeVoiceAgent</span> {
+  <span class="keyword">async</span> <span class="function">connect</span>() {
+    <span class="comment">// Step 1: Get ephemeral token (security layer)</span>
+    <span class="keyword">const</span> tokenResponse = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'/api/session'</span>);
+    <span class="keyword">const</span> data = <span class="keyword">await</span> tokenResponse.<span class="function">json</span>();
+    
+    <span class="comment">// Step 2: Create the main connection object (like opening a phone line)</span>
+    <span class="keyword">this</span>.pc = <span class="keyword">new</span> <span class="function">RTCPeerConnection</span>({
+      iceServers: [{ urls: <span class="string">'stun:stun.l.google.com:19302'</span> }]
+      <span class="comment">// STUN server helps find your public IP behind router</span>
+    });
+    
+    <span class="comment">// Step 3: Connect your microphone (with quality improvements)</span>
+    <span class="keyword">const</span> stream = <span class="keyword">await</span> navigator.mediaDevices.<span class="function">getUserMedia</span>({ 
+      audio: {
+        echoCancellation: <span class="keyword">true</span>,  <span class="comment">// Prevents feedback loops</span>
+        noiseSuppression: <span class="keyword">true</span>,  <span class="comment">// Removes background noise</span>
+        autoGainControl: <span class="keyword">true</span>    <span class="comment">// Normalizes volume</span>
+      }
+    });
+    stream.<span class="function">getTracks</span>().<span class="function">forEach</span>(track => 
+      <span class="keyword">this</span>.pc.<span class="function">addTrack</span>(track, stream)
+    );
+    
+    <span class="comment">// Step 4: Create data channel (for non-audio communication)</span>
+    <span class="keyword">this</span>.dc = <span class="keyword">this</span>.pc.<span class="function">createDataChannel</span>(<span class="string">'oai-events'</span>, {
+      ordered: <span class="keyword">true</span>  <span class="comment">// Messages arrive in order sent</span>
+    });
+    
+    <span class="comment">// Step 5: Negotiate connection (WebRTC handshake)</span>
+    <span class="keyword">const</span> offer = <span class="keyword">await</span> <span class="keyword">this</span>.pc.<span class="function">createOffer</span>();  <span class="comment">// "I want to connect"</span>
+    <span class="keyword">await</span> <span class="keyword">this</span>.pc.<span class="function">setLocalDescription</span>(offer);    <span class="comment">// Save our offer</span>
+    <span class="keyword">await</span> <span class="keyword">this</span>.pc.<span class="function">setRemoteDescription</span>(data.answer); <span class="comment">// Accept OpenAI's response</span>
+  }
+}</code></pre>
+            </div>
+            <p style="margin-top: 20px;"><strong>🎯 Key Point:</strong> Each component has a specific job - peer connection for audio, data channel for everything else</p>
+        </div>
+
+        <!-- Slide 7a: Understanding WebRTC Components -->
+        <div class="slide">
+            <h2>Understanding WebRTC: The Two Channels</h2>
+            <div class="diagram" style="background: #2d3748; color: #e2e8f0; padding: 30px; border-radius: 15px; margin-bottom: 25px;">
+                <h3 style="color: #f1fa8c; text-align: center; margin-bottom: 25px;">Why We Need Two Different Channels</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div style="background: #4a5568; padding: 20px; border-radius: 10px;">
+                        <h4 style="color: #50fa7b; margin-bottom: 15px;">🎙️ Audio Channel (RTCPeerConnection)</h4>
+                        <p style="font-size: 0.95em; margin-bottom: 10px;"><strong>Purpose:</strong> Real-time voice streaming</strong></p>
+                        <ul style="font-size: 0.9em; margin: 10px 0;">
+                            <li>Your voice → OpenAI</li>
+                            <li>AI voice → Your speakers</li>
+                            <li>Continuous streaming (like a phone call)</li>
+                            <li>Handles network complexity (NAT/firewall)</li>
+                        </ul>
+                        <p style="font-size: 0.85em; color: #a0aec0; margin-top: 15px;">Think of it as: <strong>The phone line</strong></p>
+                    </div>
+                    <div style="background: #4a5568; padding: 20px; border-radius: 10px;">
+                        <h4 style="color: #ff79c6; margin-bottom: 15px;">📨 Data Channel</h4>
+                        <p style="font-size: 0.95em; margin-bottom: 10px;"><strong>Purpose:</strong> Everything else</strong></p>
+                        <ul style="font-size: 0.9em; margin: 10px 0;">
+                            <li>AI configuration & instructions</li>
+                            <li>Tool execution requests</li>
+                            <li>Live transcripts (both sides)</li>
+                            <li>Interruption detection events</li>
+                            <li>Session state management</li>
+                        </ul>
+                        <p style="font-size: 0.85em; color: #a0aec0; margin-top: 15px;">Think of it as: <strong>Text messages alongside the call</strong></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <h3>❓ Common Misconception</h3>
+                <p><strong>"Can't we just send everything through audio?"</strong> No! Here's why:</p>
+                <ul style="font-size: 0.95em;">
+                    <li>🚫 Audio is for continuous streaming, not structured data</li>
+                    <li>🚫 Tool calls need JSON format, not speech</li>
+                    <li>🚫 Transcripts would create feedback loops if sent as audio</li>
+                    <li>✅ DataChannel provides reliable, ordered message delivery</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 7b: Visual Flow Diagram -->
+        <div class="slide">
+            <h2>Complete WebRTC Flow: Visual Overview</h2>
+            <div class="diagram" style="background: linear-gradient(135deg, #f8f9fa 0%, #e2e8f0 100%); padding: 30px; border-radius: 15px;">
+                <h3 style="text-align: center; color: #667eea; margin-bottom: 30px;">How Audio and Data Work Together</h3>
+                
+                <!-- Flow Diagram -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <!-- Browser Side -->
+                    <div style="flex: 1; text-align: center;">
+                        <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                            <h4 style="color: #667eea;">🌐 Your Browser</h4>
+                            <div style="margin: 15px 0;">
+                                <div style="background: #e0f2fe; padding: 10px; border-radius: 5px; margin: 5px 0;">
+                                    <strong>Microphone</strong><br>
+                                    <span style="font-size: 0.85em;">Captures voice</span>
+                                </div>
+                                <div style="background: #fef3c7; padding: 10px; border-radius: 5px; margin: 5px 0;">
+                                    <strong>Speakers</strong><br>
+                                    <span style="font-size: 0.85em;">Plays AI voice</span>
+                                </div>
+                                <div style="background: #ede9fe; padding: 10px; border-radius: 5px; margin: 5px 0;">
+                                    <strong>JavaScript</strong><br>
+                                    <span style="font-size: 0.85em;">Handles events</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Connection Lines -->
+                    <div style="flex: 1; padding: 0 20px;">
+                        <div style="position: relative; height: 200px;">
+                            <!-- Audio Stream -->
+                            <div style="position: absolute; top: 30px; width: 100%;">
+                                <div style="background: #10a37f; color: white; padding: 8px; border-radius: 20px; text-align: center; margin-bottom: 5px;">
+                                    🎙️ Audio Stream →
+                                </div>
+                                <div style="background: #10a37f; color: white; padding: 8px; border-radius: 20px; text-align: center; margin-top: 5px;">
+                                    ← 🔊 AI Voice
+                                </div>
+                            </div>
+                            
+                            <!-- Data Channel -->
+                            <div style="position: absolute; bottom: 30px; width: 100%;">
+                                <div style="background: #9333ea; color: white; padding: 8px; border-radius: 20px; text-align: center; margin-bottom: 5px;">
+                                    📤 Tool Calls →
+                                </div>
+                                <div style="background: #9333ea; color: white; padding: 8px; border-radius: 20px; text-align: center; margin-top: 5px;">
+                                    ← 📥 Transcripts
+                                </div>
+                            </div>
+                            
+                            <!-- RTCPeerConnection Label -->
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 10px 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                <strong>RTCPeerConnection</strong><br>
+                                <span style="font-size: 0.8em; color: #666;">Manages both channels</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- OpenAI Side -->
+                    <div style="flex: 1; text-align: center;">
+                        <div style="background: linear-gradient(135deg, #10a37f 0%, #1a7f64 100%); color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                            <h4>🤖 OpenAI Realtime</h4>
+                            <div style="margin: 15px 0;">
+                                <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px; margin: 5px 0;">
+                                    <strong>Speech Recognition</strong><br>
+                                    <span style="font-size: 0.85em;">Understands voice</span>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px; margin: 5px 0;">
+                                    <strong>AI Processing</strong><br>
+                                    <span style="font-size: 0.85em;">Generates response</span>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px; margin: 5px 0;">
+                                    <strong>Tool Execution</strong><br>
+                                    <span style="font-size: 0.85em;">Calls your API</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Example Messages -->
+                <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                    <h4 style="color: #764ba2; margin-bottom: 15px;">Example Data Channel Messages</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 0.9em;">
+                        <div>
+                            <strong style="color: #667eea;">→ To OpenAI:</strong>
+                            <pre style="background: #2d3748; color: #e2e8f0; padding: 10px; border-radius: 5px; margin-top: 5px;"><code>{
+  <span class="string">"type"</span>: <span class="string">"response.create"</span>,
+  <span class="string">"response"</span>: {
+    <span class="string">"tools"</span>: [...],
+    <span class="string">"instructions"</span>: <span class="string">"You are Bella..."</span>
+  }
+}</code></pre>
+                        </div>
+                        <div>
+                            <strong style="color: #764ba2;">← From OpenAI:</strong>
+                            <pre style="background: #2d3748; color: #e2e8f0; padding: 10px; border-radius: 5px; margin-top: 5px;"><code>{
+  <span class="string">"type"</span>: <span class="string">"response.function_call"</span>,
+  <span class="string">"name"</span>: <span class="string">"submit_order"</span>,
+  <span class="string">"arguments"</span>: <span class="string">"{\"items\":[...]}"</span>
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7c: Data Channel Events -->
+        <div class="slide">
+            <h2>Data Channel: The Tool Execution Pipeline</h2>
+            <div class="code-snippet">
+                <span class="code-lang">agent.js - DataChannel Setup</span>
+                <pre><code><span class="comment">// Data channel handles all non-audio communication</span>
+<span class="keyword">this</span>.dc.<span class="function">onopen</span> = () => {
+  <span class="comment">// Send initial configuration</span>
+  <span class="keyword">this</span>.dc.<span class="function">send</span>(JSON.<span class="function">stringify</span>({
+    type: <span class="string">'session.update'</span>,
+    session: {
+      tools: <span class="keyword">this</span>.tools,
+      instructions: <span class="string">`You are Bella, a friendly barista...`</span>,
+      turn_detection: {
+        type: <span class="string">'server_vad'</span>,
+        threshold: <span class="number">0.5</span>,
+        silence_duration_ms: <span class="number">200</span>
+      }
+    }
+  }));
+};
+
+<span class="keyword">this</span>.dc.<span class="function">onmessage</span> = (event) => {
+  <span class="keyword">const</span> msg = JSON.<span class="function">parse</span>(event.data);
+  
+  <span class="keyword">switch</span>(msg.type) {
+    <span class="keyword">case</span> <span class="string">'response.audio.transcript.delta'</span>:
+      <span class="comment">// Agent is speaking</span>
+      <span class="keyword">this</span>.<span class="function">updateTranscript</span>(msg.delta);
+      <span class="keyword">break</span>;
+      
+    <span class="keyword">case</span> <span class="string">'response.function_call_arguments.done'</span>:
+      <span class="comment">// Tool call requested</span>
+      <span class="keyword">this</span>.<span class="function">executeTool</span>(msg.name, msg.arguments);
+      <span class="keyword">break</span>;
+      
+    <span class="keyword">case</span> <span class="string">'input_audio_buffer.speech_started'</span>:
+      <span class="comment">// User started speaking (interruption)</span>
+      <span class="keyword">this</span>.<span class="function">handleInterruption</span>();
+      <span class="keyword">break</span>;
+  }
+};</code></pre>
+            </div>
+            <p><strong>Key:</strong> DataChannel enables bidirectional event flow for tools and transcripts</p>
+        </div>
+
+        <!-- Slide 8: Tool Configuration -->
+        <div class="slide">
+            <h2>Configuring Tools for the Agent</h2>
+            <div class="code-snippet">
+                <span class="code-lang">agent.js - Tool Definitions</span>
+                <pre><code><span class="keyword">this</span>.tools = [
+  {
+    type: <span class="string">"function"</span>,
+    name: <span class="string">"fetch_menu"</span>,
+    description: <span class="string">"Fetch the current menu with items and prices"</span>,
+    parameters: { type: <span class="string">"object"</span>, properties: {} }
+  },
+  {
+    type: <span class="string">"function"</span>,
+    name: <span class="string">"set_user"</span>,
+    description: <span class="string">"Set or create a user account by name"</span>,
+    parameters: {
+      type: <span class="string">"object"</span>,
+      properties: {
+        name: { type: <span class="string">"string"</span>, description: <span class="string">"Customer's name"</span> }
+      },
+      required: [<span class="string">"name"</span>]
+    }
+  },
+  {
+    type: <span class="string">"function"</span>,
+    name: <span class="string">"submit_order"</span>,
+    description: <span class="string">"Submit the confirmed order"</span>,
+    <span class="comment">// ... parameters for items, customizations, etc.</span>
+  }
+];</code></pre>
+            </div>
+        </div>
+
+        <!-- Slide 9: Tool Execution -->
+        <div class="slide">
+            <h2>Server-Side Tool Execution</h2>
+            <div class="code-snippet">
+                <span class="code-lang">routes/tools.js</span>
+                <pre><code><span class="comment">// Find or create user with order history</span>
+router.<span class="function">post</span>(<span class="string">'/user'</span>, <span class="keyword">async</span> (req, res) => {
+  <span class="keyword">const</span> { name } = req.body;
+  
+  <span class="comment">// Check existing user</span>
+  <span class="keyword">let</span> user = <span class="keyword">await</span> db.<span class="function">findUserByName</span>(name);
+  
+  <span class="keyword">if</span> (!user) {
+    <span class="comment">// Create stable ID based on normalized name</span>
+    <span class="keyword">const</span> normalizedName = name.<span class="function">toLowerCase</span>()
+      .<span class="function">replace</span>(<span class="string">/[^a-z0-9]/g</span>, <span class="string">'_'</span>);
+    <span class="keyword">const</span> userId = <span class="string">`user_${normalizedName}`</span>;
+    user = <span class="keyword">await</span> db.<span class="function">createUser</span>(userId, name);
+  }
+  
+  <span class="comment">// Get order history for personalization</span>
+  <span class="keyword">const</span> orderHistory = <span class="keyword">await</span> db.<span class="function">getUserOrderHistory</span>(user.id);
+  <span class="keyword">const</span> userType = orderHistory.length >= <span class="number">10</span> ? <span class="string">'vip'</span> : 
+                    orderHistory.length >= <span class="number">5</span> ? <span class="string">'regular'</span> : 
+                    <span class="string">'new'</span>;
+  
+  res.<span class="function">json</span>({ userId: user.id, name: user.name, userType });
+});</code></pre>
+            </div>
+        </div>
+
+        <!-- Slide 10: WebRTC vs WebSocket -->
+        <div class="slide">
+            <h2>Trade-offs: WebRTC vs WebSocket</h2>
+            <table class="comparison-table">
+                <tr>
+                    <th>Aspect</th>
+                    <th>WebRTC (Our Choice)</th>
+                    <th>WebSocket</th>
+                </tr>
+                <tr>
+                    <td>Latency</td>
+                    <td>✅ Ultra-low (P2P possible)</td>
+                    <td>❌ Higher (server relay)</td>
+                </tr>
+                <tr>
+                    <td>Audio Quality</td>
+                    <td>✅ Built-in codecs, echo cancellation</td>
+                    <td>❌ Manual handling required</td>
+                </tr>
+                <tr>
+                    <td>Complexity</td>
+                    <td>❌ More complex setup</td>
+                    <td>✅ Simpler implementation</td>
+                </tr>
+                <tr>
+                    <td>Server Load</td>
+                    <td>✅ Minimal (direct to OpenAI)</td>
+                    <td>❌ All audio through server</td>
+                </tr>
+                <tr>
+                    <td>Browser Support</td>
+                    <td>✅ Modern browsers</td>
+                    <td>✅ Wide support</td>
+                </tr>
+            </table>
+            <div class="feature-card">
+                <strong>Why WebRTC?</strong> Direct connection to OpenAI = lower latency + less server load
+            </div>
+        </div>
+
+        <!-- Slide 11: Interruption Handling -->
+        <div class="slide">
+            <h2>How Interruptions Work</h2>
+            <div class="diagram">
+                <h3>VAD (Voice Activity Detection) Flow</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <strong>User speaks</strong> → VAD detects voice
+                    </div>
+                    <div class="timeline-item">
+                        <strong>Agent pauses</strong> → Stops current response
+                    </div>
+                    <div class="timeline-item">
+                        <strong>Processes interruption</strong> → New context
+                    </div>
+                    <div class="timeline-item">
+                        <strong>Responds naturally</strong> → Acknowledges change
+                    </div>
+                </div>
+            </div>
+            <div class="code-snippet">
+                <span class="code-lang">Configuration</span>
+                <pre><code>{
+  <span class="string">"turn_detection"</span>: {
+    <span class="string">"type"</span>: <span class="string">"server_vad"</span>,
+    <span class="string">"threshold"</span>: <span class="number">0.5</span>,
+    <span class="string">"prefix_padding_ms"</span>: <span class="number">300</span>,
+    <span class="string">"silence_duration_ms"</span>: <span class="number">200</span>
+  }
+}</code></pre>
+            </div>
+            <p><strong>Key:</strong> OpenAI handles VAD server-side, no client implementation needed!</p>
+        </div>
+
+        <!-- Slide 12: Running Tools Locally vs API -->
+        <div class="slide">
+            <h2>Tool Execution Strategies</h2>
+            <div class="two-column">
+                <div class="feature-card">
+                    <h3>Via API (Our Approach)</h3>
+                    <ul>
+                        <li>✅ Agent calls our server endpoints</li>
+                        <li>✅ Full control over execution</li>
+                        <li>✅ Database access</li>
+                        <li>✅ Business logic centralized</li>
+                        <li>❌ Extra network hop</li>
+                    </ul>
+                    <pre><code><span class="comment">// Agent makes HTTP call</span>
+POST /api/tools/submit_order</code></pre>
+                </div>
+                <div class="feature-card">
+                    <h3>Server-Side Agent</h3>
+                    <ul>
+                        <li>✅ Direct database access</li>
+                        <li>✅ No API latency</li>
+                        <li>❌ All audio through server</li>
+                        <li>❌ Higher server costs</li>
+                        <li>❌ Complex state management</li>
+                    </ul>
+                    <pre><code><span class="comment">// Agent runs on server</span>
+agent.on('tool_call', execute)</code></pre>
+                </div>
+            </div>
+            <p style="margin-top: 20px;"><strong>Recommendation:</strong> Start with API approach, optimize if needed</p>
+        </div>
+
+        <!-- Slide 13: Infrastructure Choices -->
+        <div class="slide">
+            <h2>Infrastructure: Build vs Buy</h2>
+            <table class="comparison-table">
+                <tr>
+                    <th>Component</th>
+                    <th>Build Yourself</th>
+                    <th>Use Service</th>
+                </tr>
+                <tr>
+                    <td>WebRTC Signaling</td>
+                    <td>Direct to OpenAI ✅</td>
+                    <td>LiveKit, Twilio</td>
+                </tr>
+                <tr>
+                    <td>TURN/STUN</td>
+                    <td>Public servers (risky)</td>
+                    <td>Twilio, Xirsys ✅</td>
+                </tr>
+                <tr>
+                    <td>Session Management</td>
+                    <td>In-memory/Redis ✅</td>
+                    <td>Managed Redis</td>
+                </tr>
+                <tr>
+                    <td>Database</td>
+                    <td>SQLite (dev) ✅</td>
+                    <td>PostgreSQL (prod)</td>
+                </tr>
+            </table>
+            <div class="diagram">
+                <p><strong>Our Stack:</strong> Keep it simple for MVP, scale when needed</p>
+                <p>SQLite → PostgreSQL, In-memory → Redis, Public STUN → Managed TURN</p>
+            </div>
+        </div>
+
+        <!-- Slide 13a: STUN vs TURN Explained -->
+        <div class="slide">
+            <h2>Understanding STUN vs TURN</h2>
+            <p style="text-align: center; color: #999; font-style: italic; margin-bottom: 20px;">
+                🤿 Diving deeper - slightly off topic but fundamental to WebRTC (and why your video calls sometimes fail!)
+            </p>
+            
+            <div class="two-column">
+                <div class="feature-card">
+                    <h3>🔍 STUN - The Friendly Mirror</h3>
+                    <ul style="font-size: 0.95em;">
+                        <li><strong>What it does:</strong> "Hey, what do I look like from the internet?"</li>
+                        <li><strong>Server replies:</strong> "You're at IP 73.162.x.x port 54321"</li>
+                        <li><strong>Cost:</strong> Free! (Like asking for directions)</li>
+                        <li><strong>Success rate:</strong> ~80% of connections</li>
+                        <li><strong>Fails when:</strong> Corporate firewalls, hotels, airports</li>
+                    </ul>
+                    <div class="code-snippet" style="margin-top: 15px;">
+                        <pre><code><span class="comment">// What we're using (free Google STUN)</span>
+iceServers: [{
+  urls: <span class="string">'stun:stun.l.google.com:19302'</span>
+}]</code></pre>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <h3>🔄 TURN - The Expensive Middleman</h3>
+                    <ul style="font-size: 0.95em;">
+                        <li><strong>What it does:</strong> "I'll relay everything for you"</li>
+                        <li><strong>Server says:</strong> "Send to me, I'll forward to them"</li>
+                        <li><strong>Cost:</strong> $$ (Pays for bandwidth both ways)</li>
+                        <li><strong>Success rate:</strong> ~99.9% (always works)</li>
+                        <li><strong>Downside:</strong> +20-50ms latency, costs money</li>
+                    </ul>
+                    <div class="code-snippet" style="margin-top: 15px;">
+                        <pre><code><span class="comment">// What we SHOULD use in production</span>
+iceServers: [{
+  urls: <span class="string">'turn:relay.xirsys.com:80'</span>,
+  username: <span class="string">'your-username'</span>,
+  credential: <span class="string">'your-password'</span>
+}]</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="diagram" style="margin-top: 25px; background: #2d3748; color: #e2e8f0; padding: 25px; border-radius: 10px;">
+                <h3 style="color: #f1fa8c; text-align: center; margin-bottom: 20px;">The Real-World Analogy 🏠</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div style="background: #4a5568; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #50fa7b;">STUN = Looking in a mirror</h4>
+                        <p style="font-size: 0.9em;">You're behind your home router (NAT). STUN is like calling a friend and asking "What number shows up on your caller ID?" Now you know your public phone number!</p>
+                    </div>
+                    <div style="background: #4a5568; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #ff79c6;">TURN = Using a conference call service</h4>
+                        <p style="font-size: 0.9em;">When direct calling fails (blocked by firewall), you both dial into a conference bridge. More expensive, slight delay, but always works!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-card" style="background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%); margin-top: 20px;">
+                <h3 style="color: #92400e;">🍕 Fun Fact: The Pizza Delivery Problem</h3>
+                <p style="font-size: 0.95em;">STUN/TURN is like ordering pizza to an office building:</p>
+                <ul style="font-size: 0.9em;">
+                    <li><strong>STUN:</strong> Tells you the building's address (555 Main St) but not your suite (Suite 401)</li>
+                    <li><strong>Router:</strong> The receptionist who knows to send "Suite 401" pizzas to you</li>
+                    <li><strong>TURN:</strong> When security won't let delivery in, someone meets them in the lobby and brings it up</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Slide 13b: STUN/TURN in Our Coffee Shop -->
+        <div class="slide">
+            <h2>WebRTC Infrastructure: Build vs Buy</h2>
+            
+            <div class="diagram" style="background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%); padding: 25px; border-radius: 15px; margin-bottom: 25px;">
+                <h3 style="text-align: center; color: #667eea; margin-bottom: 25px;">What We're Doing vs What We Could Do</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                    <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h4 style="color: #10a37f; margin-bottom: 15px;">✅ Our Approach (DIY)</h4>
+                        <ul style="font-size: 0.9em;">
+                            <li><strong>Direct to OpenAI</strong></li>
+                            <li><strong>Free STUN</strong> (Google)</li>
+                            <li><strong>Cost:</strong> $0 infrastructure</li>
+                            <li><strong>Control:</strong> Full ownership</li>
+                            <li><strong>Complexity:</strong> Medium</li>
+                            <li><strong>Success rate:</strong> ~80%</li>
+                        </ul>
+                        <div class="code-snippet" style="margin-top: 15px;">
+                            <pre style="font-size: 0.8em;"><code>// Direct WebRTC
+const pc = new RTCPeerConnection({
+  iceServers: [{
+    urls: 'stun:stun.l.google.com'
+  }]
+});</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h4 style="color: #dc2626; margin-bottom: 15px;">🔧 Twilio Voice</h4>
+                        <ul style="font-size: 0.9em;">
+                            <li><strong>Full PSTN support</strong></li>
+                            <li><strong>Global TURN</strong> included</li>
+                            <li><strong>Cost:</strong> $0.0085/min</li>
+                            <li><strong>Phone numbers</strong></li>
+                            <li><strong>Call recording</strong></li>
+                            <li><strong>99.95% SLA</strong></li>
+                        </ul>
+                        <div class="code-snippet" style="margin-top: 15px;">
+                            <pre style="font-size: 0.8em;"><code>// Twilio SDK
+const device = new Twilio.Device(
+  token, {
+    codecPreferences: ['opus'],
+    edge: 'ashburn'
+  }
+);</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h4 style="color: #9333ea; margin-bottom: 15px;">🎥 LiveKit</h4>
+                        <ul style="font-size: 0.9em;">
+                            <li><strong>WebRTC infrastructure</strong></li>
+                            <li><strong>Auto-scaling</strong> SFU</li>
+                            <li><strong>Cost:</strong> $0.006/min</li>
+                            <li><strong>Multi-party</strong> rooms</li>
+                            <li><strong>Built-in recording</strong></li>
+                            <li><strong>Global edge</strong></li>
+                        </ul>
+                        <div class="code-snippet" style="margin-top: 15px;">
+                            <pre style="font-size: 0.8em;"><code>// LiveKit SDK
+const room = new Room();
+await room.connect(url, token);
+room.on('participantConnected',
+  handleNewParticipant);</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comparison-table" style="margin-top: 20px;">
+                <table style="width: 100%; font-size: 0.9em;">
+                    <tr>
+                        <th style="background: #667eea; color: white; padding: 10px;">Feature</th>
+                        <th style="background: #10a37f; color: white; padding: 10px;">DIY (Our Approach)</th>
+                        <th style="background: #dc2626; color: white; padding: 10px;">Twilio</th>
+                        <th style="background: #9333ea; color: white; padding: 10px;">LiveKit</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; font-weight: bold;">Setup Time</td>
+                        <td style="padding: 8px;">1-2 days</td>
+                        <td style="padding: 8px;">2-4 hours</td>
+                        <td style="padding: 8px;">4-8 hours</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 8px; font-weight: bold;">Monthly Cost (1000 calls)</td>
+                        <td style="padding: 8px;">~$40 (OpenAI only)</td>
+                        <td style="padding: 8px;">~$57 ($17 Twilio + $40 OpenAI)</td>
+                        <td style="padding: 8px;">~$52 ($12 LiveKit + $40 OpenAI)</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; font-weight: bold;">Reliability</td>
+                        <td style="padding: 8px;">80% (no TURN)</td>
+                        <td style="padding: 8px;">99.95%</td>
+                        <td style="padding: 8px;">99.9%</td>
+                    </tr>
+                    <tr style="background: #f8f9fa;">
+                        <td style="padding: 8px; font-weight: bold;">Best For</td>
+                        <td style="padding: 8px;">MVPs, demos</td>
+                        <td style="padding: 8px;">Phone integration</td>
+                        <td style="padding: 8px;">Multi-user, video</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="feature-card" style="background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%); margin-top: 20px;">
+                <h3 style="color: #92400e;">🤔 When to Use Each Approach</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <div>
+                        <strong>DIY WebRTC:</strong>
+                        <ul style="font-size: 0.85em; margin-top: 5px;">
+                            <li>Proof of concept</li>
+                            <li>Maximum control</li>
+                            <li>Cost sensitive</li>
+                            <li>Simple use case</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong>Twilio:</strong>
+                        <ul style="font-size: 0.85em; margin-top: 5px;">
+                            <li>Need phone numbers</li>
+                            <li>SMS integration</li>
+                            <li>Enterprise SLA</li>
+                            <li>Compliance needs</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong>LiveKit:</strong>
+                        <ul style="font-size: 0.85em; margin-top: 5px;">
+                            <li>Multi-party calls</li>
+                            <li>Video support</li>
+                            <li>Screen sharing</li>
+                            <li>Advanced routing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13b: MVP Architecture -->
+        <div class="slide">
+            <h2>MVP Architecture (What We Built)</h2>
+            <div class="diagram" style="background: #f8f9fa; padding: 30px; border-radius: 15px;">
+                <h3 style="text-align: center; color: #667eea; margin-bottom: 30px;">Minimal Viable Product - Fast to Market</h3>
+                <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap;">
+                    <!-- Browser -->
+                    <div style="text-align: center; margin: 10px;">
+                        <div class="component" style="margin-bottom: 10px;">
+                            <h4>Browser</h4>
+                            <p style="font-size: 0.8em;">Vanilla JS</p>
+                        </div>
+                        <p style="font-size: 0.9em;">↓ WebRTC</p>
+                    </div>
+                    
+                    <!-- OpenAI -->
+                    <div style="text-align: center; margin: 10px;">
+                        <div class="component" style="background: linear-gradient(135deg, #10a37f 0%, #1a7f64 100%);">
+                            <h4>OpenAI</h4>
+                            <p style="font-size: 0.8em;">Realtime API</p>
+                        </div>
+                        <p style="font-size: 0.9em;">↓ Tools</p>
+                    </div>
+                    
+                    <!-- Express Server -->
+                    <div style="text-align: center; margin: 10px;">
+                        <div class="component">
+                            <h4>Express.js</h4>
+                            <p style="font-size: 0.8em;">Single Server</p>
+                        </div>
+                        <p style="font-size: 0.9em;">↓</p>
+                    </div>
+                    
+                    <!-- SQLite -->
+                    <div style="text-align: center; margin: 10px;">
+                        <div class="component" style="background: linear-gradient(135deg, #003b57 0%, #005a87 100%);">
+                            <h4>SQLite</h4>
+                            <p style="font-size: 0.8em;">Local File</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="feature-card">
+                        <h4 style="color: #667eea;">✅ Pros</h4>
+                        <ul style="font-size: 0.9em;">
+                            <li>Quick to deploy</li>
+                            <li>Single server setup</li>
+                            <li>Zero infrastructure cost</li>
+                            <li>Easy local development</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4 style="color: #f5576c;">⚠️ Limitations</h4>
+                        <ul style="font-size: 0.9em;">
+                            <li>No redundancy</li>
+                            <li>Limited scaling</li>
+                            <li>Public STUN only</li>
+                            <li>In-memory sessions</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-snippet" style="margin-top: 20px;">
+                <span class="code-lang">MVP Deployment</span>
+                <pre><code><span class="comment"># Simple deployment</span>
+git clone repo
+npm install
+npm start  <span class="comment"># That's it!</span></code></pre>
+            </div>
+        </div>
+
+        <!-- Slide 13c: Production Architecture -->
+        <div class="slide">
+            <h2>Recommended Production Architecture</h2>
+            <div class="diagram" style="background: #f8f9fa; padding: 25px; border-radius: 15px;">
+                <h3 style="text-align: center; color: #764ba2; margin-bottom: 25px;">Scalable, Reliable, Observable</h3>
+                
+                <!-- Architecture Diagram -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
+                    <!-- Client Layer -->
+                    <div style="grid-column: span 4; text-align: center;">
+                        <div style="display: inline-block; padding: 10px 20px; background: #e2e8f0; border-radius: 8px;">
+                            <strong>CDN (CloudFlare)</strong> - Static Assets
+                        </div>
+                    </div>
+                    
+                    <!-- API Gateway -->
+                    <div style="grid-column: span 4; text-align: center; margin-top: 10px;">
+                        <div style="display: inline-block; padding: 10px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
+                            <strong>API Gateway / Load Balancer</strong>
+                        </div>
+                    </div>
+                    
+                    <!-- Services -->
+                    <div style="text-align: center; margin-top: 20px;">
+                        <div class="component" style="font-size: 0.9em;">
+                            <strong>Auth Service</strong><br>
+                            <span style="font-size: 0.8em;">JWT/OAuth</span>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <div class="component" style="font-size: 0.9em;">
+                            <strong>Session API</strong><br>
+                            <span style="font-size: 0.8em;">Token Gen</span>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <div class="component" style="font-size: 0.9em;">
+                            <strong>Tools API</strong><br>
+                            <span style="font-size: 0.8em;">Business Logic</span>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <div class="component" style="font-size: 0.9em;">
+                            <strong>Analytics</strong><br>
+                            <span style="font-size: 0.8em;">Metrics/Logs</span>
+                        </div>
+                    </div>
+                    
+                    <!-- External Services -->
+                    <div style="grid-column: span 2; text-align: center; margin-top: 20px;">
+                        <div style="padding: 15px; background: #10a37f; color: white; border-radius: 8px;">
+                            <strong>OpenAI Realtime</strong><br>
+                            <span style="font-size: 0.8em;">Direct WebRTC</span>
+                        </div>
+                    </div>
+                    
+                    <div style="grid-column: span 2; text-align: center; margin-top: 20px;">
+                        <div style="padding: 15px; background: #9333ea; color: white; border-radius: 8px;">
+                            <strong>TURN Provider</strong><br>
+                            <span style="font-size: 0.8em;">Twilio/Xirsys</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Data Layer -->
+                    <div style="text-align: center; margin-top: 20px;">
+                        <div style="padding: 15px; background: #dc2626; color: white; border-radius: 8px;">
+                            <strong>Redis</strong><br>
+                            <span style="font-size: 0.8em;">Sessions</span>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <div style="padding: 15px; background: #2563eb; color: white; border-radius: 8px;">
+                            <strong>PostgreSQL</strong><br>
+                            <span style="font-size: 0.8em;">Primary DB</span>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <div style="padding: 15px; background: #16a34a; color: white; border-radius: 8px;">
+                            <strong>S3</strong><br>
+                            <span style="font-size: 0.8em;">Recordings</span>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <div style="padding: 15px; background: #ea580c; color: white; border-radius: 8px;">
+                            <strong>DataDog</strong><br>
+                            <span style="font-size: 0.8em;">APM/Logs</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Production Features -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                    <div style="background: #e0f2fe; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #0369a1; margin-bottom: 10px;">🔒 Security</h4>
+                        <ul style="font-size: 0.85em; margin: 0;">
+                            <li>Rate limiting</li>
+                            <li>DDoS protection</li>
+                            <li>API key rotation</li>
+                            <li>Encrypted storage</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #fef3c7; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #d97706; margin-bottom: 10px;">📊 Observability</h4>
+                        <ul style="font-size: 0.85em; margin: 0;">
+                            <li>Real-time metrics</li>
+                            <li>Error tracking</li>
+                            <li>Performance APM</li>
+                            <li>Cost monitoring</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #ede9fe; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #7c3aed; margin-bottom: 10px;">⚡ Scalability</h4>
+                        <ul style="font-size: 0.85em; margin: 0;">
+                            <li>Auto-scaling</li>
+                            <li>Multi-region</li>
+                            <li>Queue system</li>
+                            <li>Caching layers</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Audio Visualization -->
+        <div class="slide">
+            <h2>Real-Time Audio Visualization</h2>
+            <div class="code-snippet">
+                <span class="code-lang">agent.js</span>
+                <pre><code><span class="comment">// Setup audio analysis</span>
+<span class="keyword">this</span>.audioContext = <span class="keyword">new</span> <span class="function">AudioContext</span>();
+<span class="keyword">this</span>.micAnalyser = <span class="keyword">this</span>.audioContext.<span class="function">createAnalyser</span>();
+
+<span class="comment">// Connect microphone to analyser</span>
+<span class="keyword">const</span> source = <span class="keyword">this</span>.audioContext.<span class="function">createMediaStreamSource</span>(stream);
+source.<span class="function">connect</span>(<span class="keyword">this</span>.micAnalyser);
+
+<span class="comment">// Visualize with canvas</span>
+<span class="function">visualize</span>() {
+  <span class="keyword">const</span> dataArray = <span class="keyword">new</span> <span class="function">Uint8Array</span>(<span class="keyword">this</span>.analyser.frequencyBinCount);
+  <span class="keyword">this</span>.analyser.<span class="function">getByteFrequencyData</span>(dataArray);
+  
+  <span class="comment">// Draw frequency bars</span>
+  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i < dataArray.length; i++) {
+    <span class="keyword">const</span> barHeight = dataArray[i] / <span class="number">2</span>;
+    ctx.<span class="function">fillRect</span>(x, canvas.height - barHeight, barWidth, barHeight);
+  }
+  
+  <span class="function">requestAnimationFrame</span>(() => <span class="keyword">this</span>.<span class="function">visualize</span>());
+}</code></pre>
+            </div>
+            <p><strong>Purpose:</strong> Visual feedback builds user confidence in the connection</p>
+        </div>
+
+        <!-- Slide 15: Session & State Management -->
+        <div class="slide">
+            <h2>Managing Session State</h2>
+            <div class="code-snippet">
+                <span class="code-lang">services/session-manager.js</span>
+                <pre><code><span class="keyword">class</span> <span class="function">SessionManager</span> {
+  <span class="function">constructor</span>() {
+    <span class="keyword">this</span>.sessions = <span class="keyword">new</span> <span class="function">Map</span>();
+    <span class="keyword">this</span>.<span class="function">startCleanupInterval</span>();
+  }
+  
+  <span class="function">getOrCreateSession</span>(sessionId) {
+    <span class="keyword">if</span> (!<span class="keyword">this</span>.sessions.<span class="function">has</span>(sessionId)) {
+      <span class="keyword">this</span>.sessions.<span class="function">set</span>(sessionId, {
+        userId: <span class="keyword">null</span>,
+        currentOrder: { items: [] },
+        lastActivity: Date.<span class="function">now</span>(),
+        context: {}
+      });
+    }
+    <span class="keyword">return</span> <span class="keyword">this</span>.sessions.<span class="function">get</span>(sessionId);
+  }
+  
+  <span class="function">startCleanupInterval</span>() {
+    <span class="function">setInterval</span>(() => {
+      <span class="keyword">const</span> now = Date.<span class="function">now</span>();
+      <span class="keyword">for</span> (<span class="keyword">const</span> [id, session] <span class="keyword">of</span> <span class="keyword">this</span>.sessions) {
+        <span class="keyword">if</span> (now - session.lastActivity > <span class="number">30</span> * <span class="number">60</span> * <span class="number">1000</span>) {
+          <span class="keyword">this</span>.sessions.<span class="function">delete</span>(id); <span class="comment">// Clean after 30 min</span>
+        }
+      }
+    }, <span class="number">60000</span>); <span class="comment">// Check every minute</span>
+  }
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- Slide 16: Error Handling & Edge Cases -->
+        <div class="slide">
+            <h2>Production Considerations</h2>
+            <div class="two-column">
+                <div>
+                    <h3>Error Handling</h3>
+                    <ul>
+                        <li>Network disconnections</li>
+                        <li>API rate limits</li>
+                        <li>Invalid tool calls</li>
+                        <li>Database failures</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Edge Cases</h3>
+                    <ul>
+                        <li>Multiple simultaneous orders</li>
+                        <li>Session timeout during order</li>
+                        <li>Conflicting user names</li>
+                        <li>Background noise/music</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="code-snippet">
+                <span class="code-lang">Error Recovery</span>
+                <pre><code><span class="keyword">this</span>.pc.<span class="function">onconnectionstatechange</span> = () => {
+  <span class="keyword">if</span> (<span class="keyword">this</span>.pc.connectionState === <span class="string">'failed'</span>) {
+    <span class="keyword">this</span>.<span class="function">attemptReconnect</span>();
+  }
+};
+
+<span class="keyword">this</span>.dc.<span class="function">onerror</span> = (error) => {
+  console.<span class="function">error</span>(<span class="string">'DataChannel error:'</span>, error);
+  <span class="keyword">this</span>.<span class="function">handleToolError</span>(error);
+};</code></pre>
+            </div>
+        </div>
+
+        <!-- Slide 17: Performance Optimizations -->
+        <div class="slide">
+            <h2>Performance Optimizations</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <strong>Connection pooling</strong> - Reuse database connections
+                </div>
+                <div class="timeline-item">
+                    <strong>Response caching</strong> - Cache menu and static data
+                </div>
+                <div class="timeline-item">
+                    <strong>Batch operations</strong> - Group database writes
+                </div>
+                <div class="timeline-item">
+                    <strong>CDN for assets</strong> - Serve static files from edge
+                </div>
+            </div>
+            <h3>Monitoring Setup</h3>
+            <pre><code><span class="comment">// Track key metrics</span>
+<span class="keyword">const</span> metrics = {
+  sessionDuration: [],
+  toolCallLatency: [],
+  orderCompletionRate: <span class="number">0</span>,
+  apiErrors: []
+};</code></pre>
+            <div class="demo-placeholder">
+                🎭 DEMO: Show real-time metrics dashboard
+            </div>
+        </div>
+
+        <!-- Slide 18: Live Demo Architecture -->
+        <div class="slide">
+            <h2>Live Demo Time!</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <strong>1. Initial Connection</strong> - Show WebRTC negotiation
+                </div>
+                <div class="timeline-item">
+                    <strong>2. Voice Ordering</strong> - Natural conversation flow
+                </div>
+                <div class="timeline-item">
+                    <strong>3. Interruption</strong> - Change order mid-sentence
+                </div>
+                <div class="timeline-item">
+                    <strong>4. Tool Execution</strong> - Show network tab
+                </div>
+                <div class="timeline-item">
+                    <strong>5. Order Completion</strong> - Database persistence
+                </div>
+            </div>
+            <div class="demo-placeholder">
+                🚀 LIVE DEMO: Full ordering flow with interruptions
+            </div>
+            <p style="margin-top: 30px;"><strong>Watch for:</strong> Latency, interruption handling, tool calls</p>
+        </div>
+
+        <!-- Slide 19: Lessons Learned -->
+        <div class="slide">
+            <h2>Key Takeaways</h2>
+            <div class="two-column">
+                <div class="feature-card">
+                    <h3>What Worked Well</h3>
+                    <ul>
+                        <li>Direct WebRTC to OpenAI</li>
+                        <li>Modular tool system</li>
+                        <li>Simple state management</li>
+                        <li>SQLite for MVP</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>Challenges</h3>
+                    <ul>
+                        <li>WebRTC complexity</li>
+                        <li>Session recovery</li>
+                        <li>Tool error handling</li>
+                        <li>Voice clarity in noisy environments</li>
+                    </ul>
+                </div>
+            </div>
+            <h3>Future Improvements</h3>
+            <ul>
+                <li>🎯 Multi-language support</li>
+                <li>🎯 Voice cloning for brand consistency</li>
+                <li>🎯 Advanced personalization with ML</li>
+                <li>🎯 Integration with POS systems</li>
+            </ul>
+        </div>
+
+        <!-- Slide 20: Resources & Q&A -->
+        <div class="slide">
+            <h2>Resources & Questions</h2>
+            <div class="diagram">
+                <h3>Code & Documentation</h3>
+                <ul style="list-style: none; font-size: 1.2em;">
+                    <li>📦 <strong>GitHub:</strong> [Your repo here]</li>
+                    <li>📚 <strong>OpenAI Docs:</strong> platform.openai.com/docs/guides/realtime</li>
+                    <li>🔧 <strong>WebRTC Guide:</strong> webrtc.org</li>
+                </ul>
+            </div>
+            <div class="two-column" style="margin-top: 40px;">
+                <div class="feature-card">
+                    <h3>Quick Start</h3>
+                    <pre><code>npm install
+npm run dev
+# Visit localhost:3001</code></pre>
+                </div>
+                <div class="feature-card">
+                    <h3>Contact</h3>
+                    <p>Email: contact@nateross.dev</p>
+                    <p>Blog: nateross.dev/blog</p>
+                    <p>GitHub: <a href="https://github.com/wickdninja/agent-sdk">github.com/wickdninja/agent-sdk</a></p>
+                </div>
+            </div>
+            <h2 style="margin-top: 40px; text-align: center;" class="highlight">Questions?</h2>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+        <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+        <button class="nav-btn" onclick="toggleFullscreen()">Fullscreen</button>
+        <button class="nav-btn" onclick="resetTimer()">Reset Timer</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let startTime = Date.now();
+        let timerInterval;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            updateSlideNumber();
+            updateNavButtons();
+        }
+
+        function changeSlide(direction) {
+            showSlide(currentSlide + direction);
+        }
+
+        function updateSlideNumber() {
+            document.getElementById('slideNumber').textContent = 
+                `${currentSlide + 1} / ${totalSlides}`;
+        }
+
+        function updateNavButtons() {
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function updateTimer() {
+            const elapsed = Date.now() - startTime;
+            const minutes = Math.floor(elapsed / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function resetTimer() {
+            startTime = Date.now();
+            updateTimer();
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowLeft':
+                    if (currentSlide > 0) changeSlide(-1);
+                    break;
+                case 'ArrowRight':
+                case ' ':
+                    if (currentSlide < totalSlides - 1) changeSlide(1);
+                    break;
+                case 'f':
+                    toggleFullscreen();
+                    break;
+                case 'r':
+                    resetTimer();
+                    break;
+                case 'Home':
+                    showSlide(0);
+                    break;
+                case 'End':
+                    showSlide(totalSlides - 1);
+                    break;
+            }
+        });
+
+        // Touch/swipe support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                // Swipe left
+                if (currentSlide < totalSlides - 1) changeSlide(1);
+            }
+            if (touchEndX > touchStartX + 50) {
+                // Swipe right
+                if (currentSlide > 0) changeSlide(-1);
+            }
+        }
+
+        // Initialize
+        updateSlideNumber();
+        updateNavButtons();
+        timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // Progress indicator
+        const progressBar = document.createElement('div');
+        progressBar.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            z-index: 1001;
+        `;
+        document.body.appendChild(progressBar);
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Update progress on slide change
+        const originalShowSlide = showSlide;
+        showSlide = function(n) {
+            originalShowSlide(n);
+            updateProgress();
+        };
+
+        updateProgress();
+    </script>
+</body>
+</html>
