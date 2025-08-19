@@ -1213,22 +1213,22 @@ turn_detection: { type: <span class="string">'none'</span> }
                 
                 <div>
                     <h3 style="color: #764ba2;">🏢 Production Architecture</h3>
-                    <div class="feature-card" style="background: #fef3c7;">
-                        <h4>Separation of Concerns</h4>
-                        <pre style="font-size: 0.85em; background: white; padding: 15px; border-radius: 8px;"><code>src/
-├── core/
-│   ├── VoiceAgent.js      <span class="comment"># Core logic only</span>
-│   ├── WebRTCManager.js    <span class="comment"># Connection handling</span>
-│   └── ToolExecutor.js     <span class="comment"># Tool execution</span>
-├── ui/
-│   ├── ChatUI.js           <span class="comment"># Chat interface</span>
-│   ├── AudioVisualizer.js  <span class="comment"># Waveforms</span>
-│   └── OrderStatus.js      <span class="comment"># Order display</span>
-├── services/
-│   ├── api.js              <span class="comment"># Backend calls</span>
-│   └── sessionManager.js   <span class="comment"># State mgmt</span>
-└── config/
-    └── tools.js            <span class="comment"># Tool definitions</span></code></pre>
+                    <div class="feature-card" style="background: #1a1a2e; border: 1px solid #16213e;">
+                        <h4 style="color: #fff;">Separation of Concerns</h4>
+                        <pre style="font-size: 0.85em; background: #0f0f1e; padding: 15px; border-radius: 8px; color: #e0e0e0; border: 1px solid #2a2a3e;"><code><span style="color: #ffd700;">src/</span>
+<span style="color: #e0e0e0;">├── </span><span style="color: #ffd700;">core/</span>
+<span style="color: #e0e0e0;">│   ├── </span><span style="color: #87ceeb;">VoiceAgent.js</span>      <span style="color: #7f8c8d;"># Core logic only</span>
+<span style="color: #e0e0e0;">│   ├── </span><span style="color: #87ceeb;">WebRTCManager.js</span>    <span style="color: #7f8c8d;"># Connection handling</span>
+<span style="color: #e0e0e0;">│   └── </span><span style="color: #87ceeb;">ToolExecutor.js</span>     <span style="color: #7f8c8d;"># Tool execution</span>
+<span style="color: #e0e0e0;">├── </span><span style="color: #ffd700;">ui/</span>
+<span style="color: #e0e0e0;">│   ├── </span><span style="color: #87ceeb;">ChatUI.js</span>           <span style="color: #7f8c8d;"># Chat interface</span>
+<span style="color: #e0e0e0;">│   ├── </span><span style="color: #87ceeb;">AudioVisualizer.js</span>  <span style="color: #7f8c8d;"># Waveforms</span>
+<span style="color: #e0e0e0;">│   └── </span><span style="color: #87ceeb;">OrderStatus.js</span>      <span style="color: #7f8c8d;"># Order display</span>
+<span style="color: #e0e0e0;">├── </span><span style="color: #ffd700;">services/</span>
+<span style="color: #e0e0e0;">│   ├── </span><span style="color: #87ceeb;">api.js</span>              <span style="color: #7f8c8d;"># Backend calls</span>
+<span style="color: #e0e0e0;">│   └── </span><span style="color: #87ceeb;">sessionManager.js</span>   <span style="color: #7f8c8d;"># State mgmt</span>
+<span style="color: #e0e0e0;">└── </span><span style="color: #ffd700;">config/</span>
+<span style="color: #e0e0e0;">    └── </span><span style="color: #87ceeb;">tools.js</span>            <span style="color: #7f8c8d;"># Tool definitions</span></code></pre>
                     </div>
                     
                     <div class="feature-card" style="background: #ede9fe; margin-top: 15px;">
