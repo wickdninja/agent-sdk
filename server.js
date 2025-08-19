@@ -14,6 +14,12 @@ if (!process.env.OPENAI_API_KEY) {
   process.exit(1);
 }
 
+if (!process.env.ZEP_API_KEY) {
+  console.error('❌ ZEP_API_KEY is required but missing');
+  console.error('Please add ZEP_API_KEY to your .env file');
+  process.exit(1);
+}
+
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -28,12 +34,14 @@ const sessionRoutes = require('./routes/session');
 const toolsRoutes = require('./routes/tools');
 const ordersRoutes = require('./routes/orders');
 const analyticsRoutes = require('./routes/analytics');
+const memoryRoutes = require('./routes/memory');
 
 // Register API routes
 app.use('/api/session', sessionRoutes);
 app.use('/api/tools', toolsRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/memory', memoryRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -81,6 +89,7 @@ async function startServer() {
       console.log(`✅ Server running on http://localhost:${PORT}`);
       console.log(`📊 Health check: http://localhost:${PORT}/health`);
       console.log(`🔑 OpenAI API Key: ${process.env.OPENAI_API_KEY ? 'Configured ✓' : 'Missing ✗'}`);
+      console.log(`🧠 Zep Memory API Key: ${process.env.ZEP_API_KEY ? 'Configured ✓' : 'Missing ✗'}`);
       console.log('');
       console.log('Available endpoints:');
       console.log('  GET  /api/session       - Create WebRTC session');

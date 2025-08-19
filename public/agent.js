@@ -16,6 +16,8 @@ class RealtimeVoiceAgent {
         this.suggestionUpdateInterval = null;
         this.lastInteractionTime = Date.now();
         this.sessionId = null;
+        this.memoryInitialized = false;
+        this.contextBlock = null;
         
         // DOM elements
         this.chatWindow = document.getElementById('chat-window');
@@ -45,12 +47,58 @@ class RealtimeVoiceAgent {
         // Initialize audio context
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         
+        // Memory service helper
+        this.updateMemory = async (type, data) => {
+            try {
+                const response = await fetch('/api/memory/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: this.currentUserId,
+                        sessionId: this.sessionId,
+                        type: type,
+                        data: data
+                    })
+                });
+                const result = await response.json();
+                console.log(`[Memory] Updated: ${type}`, result);
+                return result;
+            } catch (error) {
+                console.error('[Memory] Update failed:', error);
+                return null;
+            }
+        };
+        
+        // Get enriched context from memory
+        this.getMemoryContext = async () => {
+            if (!this.currentUserId) return null;
+            try {
+                const response = await fetch(`/api/memory/context/${this.currentUserId}`);
+                const context = await response.json();
+                this.contextBlock = context;
+                return context;
+            } catch (error) {
+                console.error('[Memory] Context fetch failed:', error);
+                return null;
+            }
+        };
+        
         // Tools definition
         this.tools = [
             {
                 type: "function",
                 name: "fetch_menu",
                 description: "Fetch the current menu with all items and prices",
+                parameters: {
+                    type: "object",
+                    properties: {},
+                    required: []
+                }
+            },
+            {
+                type: "function",
+                name: "get_memory_context",
+                description: "Get enriched memory context for the current user",
                 parameters: {
                     type: "object",
                     properties: {},
@@ -306,7 +354,16 @@ class RealtimeVoiceAgent {
         }
     }
     
-    sendSessionUpdate() {
+    async sendSessionUpdate() {
+        // Get memory context if user is identified
+        let contextInstructions = '';
+        if (this.currentUserId) {
+            const context = await this.getMemoryContext();
+            if (context && context.summary) {
+                contextInstructions = `\n\nCUSTOMER CONTEXT FROM MEMORY:\n${context.summary}\n\nKey Facts:\n${context.facts?.map(f => `- ${f.fact}`).join('\n') || 'None yet'}`;
+            }
+        }
+        
         const sessionUpdate = {
             type: 'session.update',
             session: {
@@ -315,17 +372,19 @@ class RealtimeVoiceAgent {
 IMPORTANT WORKFLOW:
 1. ALWAYS start by warmly greeting the customer and asking for their name
 2. Use the set_user function to create or find their account
-3. If they're a returning customer:
+3. Use get_memory_context to retrieve their personalized context and preferences
+4. If they're a returning customer:
    - Acknowledge them warmly by name
    - Mention how many times they've been here
+   - Reference their preferences from memory context
    - You can optionally ask if they want their "usual" if they have ordered before
    - Use get_order_history if they want to know what they ordered previously
-4. Use fetch_menu function when discussing menu items or prices
-5. Take their order, asking about customizations (milk type, syrups, etc.)
-6. Use confirm_order function to calculate the total
-7. Tell them the total price and ask for confirmation
-8. Use submit_order function once they confirm
-9. Provide the order number and estimated time
+5. Use fetch_menu function when discussing menu items or prices
+6. Take their order, asking about customizations (milk type, syrups, etc.)
+7. Use confirm_order function to calculate the total
+8. Tell them the total price and ask for confirmation
+9. Use submit_order function once they confirm
+10. Provide the order number and estimated time${contextInstructions}
 
 Your personality:
 - Warm, welcoming, and enthusiastic about coffee
@@ -412,6 +471,13 @@ Remember: Keep the conversation natural and friendly. You're having a real conve
                             const lastMessageText = lastMessage?.textContent || '';
                             if (!lastMessageText.includes(inputText)) {
                                 this.addMessage('You', inputText);
+                                // Update memory with user message
+                                if (this.currentUserId) {
+                                    this.updateMemory('message', {
+                                        content: inputText,
+                                        role: 'user'
+                                    });
+                                }
                             }
                         }
                     } else if (event.item.type === 'input_audio') {
@@ -423,6 +489,13 @@ Remember: Keep the conversation natural and friendly. You're having a real conve
                         const transcript = event.item.content[0].transcript || event.item.content[0].text || '';
                         if (transcript) {
                             this.addMessage('Bella', transcript);
+                            // Update memory with assistant message
+                            if (this.currentUserId) {
+                                this.updateMemory('message', {
+                                    content: transcript,
+                                    role: 'assistant'
+                                });
+                            }
                         }
                     }
                 }
@@ -447,6 +520,14 @@ Remember: Keep the conversation natural and friendly. You're having a real conve
                     const lastMessageText = lastMessage?.textContent || '';
                     if (!lastMessageText.includes(event.transcript)) {
                         this.addMessage('You', event.transcript);
+                        // Update memory with transcribed audio
+                        if (this.currentUserId) {
+                            this.updateMemory('message', {
+                                content: event.transcript,
+                                role: 'user',
+                                metadata: { source: 'audio' }
+                            });
+                        }
                     }
                 } else {
                     this.addMessage('You', '🎤 [Audio message]');
@@ -504,6 +585,15 @@ Remember: Keep the conversation natural and friendly. You're having a real conve
                     const userData = await userResponse.json();
                     this.currentUserId = userData.userId;
                     result = userData;
+                    
+                    // Update memory with user identification
+                    await this.updateMemory('user_identified', {
+                        name: args.name,
+                        firstTime: !userData.isReturning,
+                        isReturning: userData.isReturning,
+                        visitCount: userData.visitCount || 1
+                    });
+                    
                     // Show suggestions panel once user is identified
                     if (this.suggestionsPanel) {
                         this.suggestionsPanel.style.display = 'block';
@@ -523,10 +613,20 @@ Remember: Keep the conversation natural and friendly. You're having a real conve
                     });
                     const confirmData = await confirmResponse.json();
                     this.currentOrder = { items: args.items, total: confirmData.total };
-                    // Store context for suggestions
+                    
+                    // Update memory with order items
                     if (args.items && args.items.length > 0) {
+                        for (const item of args.items) {
+                            await this.updateMemory('order_item', {
+                                itemId: item.itemId,
+                                itemName: confirmData.itemDetails?.[item.itemId]?.name || item.itemId,
+                                quantity: item.quantity || 1,
+                                customizations: item.customizations || []
+                            });
+                        }
                         this.currentContext.lastItem = args.items[args.items.length - 1];
                     }
+                    
                     result = confirmData;
                     this.updateSuggestions();
                     break;
@@ -546,6 +646,13 @@ Remember: Keep the conversation natural and friendly. You're having a real conve
                         });
                         const orderData = await orderResponse.json();
                         
+                        // Update memory with completed order
+                        await this.updateMemory('order_completed', {
+                            orderId: orderData.orderId,
+                            items: this.currentOrder.items,
+                            total: this.currentOrder.total
+                        });
+                        
                         // Show order status
                         this.showOrderStatus(orderData);
                         
@@ -560,6 +667,15 @@ Remember: Keep the conversation natural and friendly. You're having a real conve
                             this.disconnect();
                             this.addMessage('System', 'Order complete! Ready for the next customer.', true);
                         }, 8000);  // Give time to see order confirmation
+                    }
+                    break;
+                    
+                case 'get_memory_context':
+                    if (!this.currentUserId) {
+                        result = { error: 'No user identified yet' };
+                    } else {
+                        const context = await this.getMemoryContext();
+                        result = context || { message: 'No context available yet' };
                     }
                     break;
                     
@@ -733,10 +849,15 @@ Remember: Keep the conversation natural and friendly. You're having a real conve
         draw();
     }
     
-    disconnect() {
+    async disconnect() {
         console.log('[Disconnect] Ending session...');
         this.isConnected = false;
         this.sessionActive = false;
+        
+        // Update memory that session ended
+        if (this.currentUserId) {
+            await this.updateMemory('session_end', {});
+        }
         
         // Stop suggestion updates
         this.stopSuggestionUpdates();
