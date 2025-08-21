@@ -6,8 +6,6 @@ A modern AI-powered coffee ordering application featuring an intelligent barista
 
 ![Brew & Byte Demo](public/demo-preview.gif)
 
-<iframe src="https://wickdninja.github.io/agent-sdk/" width="100%" height="600" frameborder="0" allowfullscreen></iframe>
-
 📊 **[View the Full Presentation](https://wickdninja.github.io/agent-sdk/)** - Learn about building real-time voice agents with OpenAI SDK
 
 ## Features
